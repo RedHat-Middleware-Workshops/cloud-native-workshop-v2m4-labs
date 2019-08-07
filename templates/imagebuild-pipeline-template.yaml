@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: Template
+metadata:
+  annotations:
+    description: This template creates a pipelie to pre-build coolstore images in a builder project
+  name: coolstore-imagebuild-template
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: coolstore-imagebuild-pipeline
+    annotations:
+      pipeline.alpha.openshift.io/uses: '[{"name": "jenkins", "namespace": "", "kind": "DeploymentConfig"}]'
+  spec:
+    triggers:
+      - type: GitHub
+        github:
+          secret: wDmoEUkbBp
+      - type: Generic
+        generic:
+          secret: wDmoEUkbBp
+    runPolicy: SerialLatestOnly
+    source:
+      type: None
+    strategy:
+      type: JenkinsPipeline
+      jenkinsPipelineStrategy:
+        env:
+        - name: GITHUB_ACCOUNT
+          value: ${GITHUB_ACCOUNT}
+        - name: GITHUB_REF
+          value: ${GITHUB_REF}
+        - name: MAVEN_MIRROR_URL
+          value: ${MAVEN_MIRROR_URL}
+        jenkinsfile: >-
+          pipeline {
+            agent any
+            triggers {
+                cron('H H * * *')
+            }
+            stages {
+              stage('Create Build Configs') {
+                steps {
+                  script {
+                    openshift.withCluster() {
+                      openshift.withProject() {
+                          openshift.verbose(false)
+                          def pipeline_template = "https://raw.githubusercontent.com/${env.GITHUB_ACCOUNT}/coolstore-microservice/${env.GITHUB_REF}/openshift/templates/coolstore-builds-template.yaml"
+                          def github_repo = "https://github.com/${env.GITHUB_ACCOUNT}/coolstore-microservice.git"
+                          def objects = openshift.process(pipeline_template, "--param", "GIT_URI=${github_repo}", "--param", "GIT_REF=${env.GITHUB_REF}", "--param", "MAVEN_MIRROR_URL=${env.MAVEN_MIRROR_URL}")
+
+                          openshift.selector( 'bc', [ demo: 'coolstore-microservice' ] ).delete()
+                          
+                          try {
+                              openshift.create(objects)
+                          } catch (e) {
+                              "Error encountered: ${e}"
+                          }
+                      }
+                    }
+                  }
+                }
+              }
+
+              stage('Build Images') {
+                steps {
+                  script {
+                    openshift.withCluster() {
+                      openshift.withProject() {
+                          openshift.selector( 'bc', [ demo: 'coolstore-microservice' ] ).withEach() {
+                            it.startBuild()
+                            sleep 60
+                          }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+parameters:
+- displayName: GitHub Account
+  name: GITHUB_ACCOUNT
+  required: true
+  value: jbossdemocentral
+- displayName: Git Branch/Tag
+  name: GITHUB_REF
+  required: true
+  value: stable-ocp-3.10
+- description: Maven mirror url. If nexus is deployed locally, use nexus url (e.g. http://nexus.ci:8081/content/groups/public/)
+  displayName: Maven mirror url
+  name: MAVEN_MIRROR_URL
+  value: https://mirror.openshift.com/nexus/content/groups/public/
+  required: true

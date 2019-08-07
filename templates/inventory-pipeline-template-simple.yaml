@@ -1,0 +1,133 @@
+apiVersion: v1
+kind: Template
+labels:
+  demo: coolstore-microservice
+  template: inventory-pipeline
+metadata:
+  name: inventory-pipeline
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      build: ${PIPELINE_NAME}
+    name: ${PIPELINE_NAME}
+    annotations:
+      pipeline.alpha.openshift.io/uses: '[{"name": "jenkins", "namespace": "", "kind": "DeploymentConfig"}]'
+  spec:
+    runPolicy: Serial
+    strategy:
+      jenkinsPipelineStrategy:
+        env:
+          - name: INVENTORY_DEV_PROJECT
+            value: ${DEV_PROJECT}
+          - name: COOLSTORE_TEST_PROJECT
+            value: ${TEST_PROJECT}
+          - name: COOLSTORE_PROD_PROJECT
+            value: ${PROD_PROJECT}
+        jenkinsfile: |-
+          def tag,altTag
+
+          pipeline {
+            agent any
+            stages {
+              stage('Build') {
+                steps {
+                  script {
+                    openshift.withCluster() {
+                      openshift.withProject(env.INVENTORY_DEV_PROJECT) {
+                        openshift.startBuild("inventory", "--wait=true")
+                      }
+                    }
+                  }
+                }
+              }
+
+              stage('Run Tests in DEV') {
+                steps {
+                  sleep 10
+                }
+              }
+
+              stage('Deploy to PROD (Not Live)') {
+                steps {
+                  script {
+                    openshift.withCluster() {
+                      openshift.withProject(env.COOLSTORE_PROD_PROJECT) {
+                        def route = openshift.selector("route", "inventory").object()
+                        def backends = []
+                        backends.add(route.spec.to)
+                        backends.addAll(route.spec.alternateBackends)
+                        def svc = backends.find {it.weight == 100}
+                        tag = svc.name == "inventory-green" ? "blue" : "green"
+                        altTag = svc.name == "inventory-green" ? "green" : "blue"
+
+                        openshift.tag("${env.INVENTORY_DEV_PROJECT}/inventory:latest", "${env.COOLSTORE_PROD_PROJECT}/inventory:prod-${tag}")
+                        openshift.selector("dc", "inventory-${tag}").rollout().status()
+                      }
+                    }
+                  }
+                }
+              }
+
+              stage('Smoke Tests in PROD (Not Live)') {
+                steps {
+                  sleep 10
+                }
+              }
+
+              stage('Approve Go Live') {
+                steps {
+                  timeout(time:15, unit:'MINUTES') {
+                      input message: "Go Live in Production (switch to new version)?", ok: "Go Live"
+                  }
+                }
+              }
+
+              stage('Go Live') {
+                steps {
+                  script {
+                    openshift.withCluster() {
+                      openshift.withProject(env.COOLSTORE_PROD_PROJECT) {
+                        openshift.set("route-backends", "inventory", "--adjust", "inventory-${tag}=100%")
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }          
+      type: JenkinsPipeline
+    triggers:
+    - github:
+        secret: ${GITHUB_WEBHOOK_SECRET}
+      type: GitHub
+    - generic:
+        secret: ${GENERIC_WEBHOOK_SECRET}
+      type: Generic
+parameters:
+- description: The name for the pipeline.
+  displayName: Pipeline Name
+  name: PIPELINE_NAME
+  required: true
+  value: inventory-pipeline
+- description: DEV project name containting the buildconfigs
+  displayName: DEV Project Name
+  name: DEV_PROJECT
+  required: true
+- description: PROD project name containting the buildconfigs
+  displayName: PROD Project Name
+  name: PROD_PROJECT
+  required: true
+- description: GitHub webhook secret
+  displayName: GitHub Webhook Secret
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: GITHUB_WEBHOOK_SECRET
+  required: true
+- description: Generic webhook secret
+  displayName: Generic Webhook Secret
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: GENERIC_WEBHOOK_SECRET
+  required: true

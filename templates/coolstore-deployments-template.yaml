@@ -1,0 +1,1632 @@
+apiVersion: v1
+kind: Template
+labels:
+  demo: coolstore-microservice
+metadata:
+  annotations:
+    description: CoolStore demo microservices deployments persistent template
+    iconClass: icon-java
+    tags: microservice,jboss,spring
+  name: coolstore-deployments
+objects:
+- apiVersion: v1
+  groupNames: null
+  kind: RoleBinding
+  metadata:
+    name: default_edit
+  roleRef:
+    name: view
+  subjects:
+  - kind: ServiceAccount
+    name: default
+# UI
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: web-ui
+    labels:
+      app: web-ui
+      comp-required: "true"
+  spec:
+    replicas: 1
+    selector:
+      app: web-ui
+      deploymentconfig: web-ui
+    strategy:
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: web-ui
+          deploymentconfig: web-ui
+      spec:
+        containers:
+        - env:
+          - name: COOLSTORE_GW_ENDPOINT
+            value: http://gw-${HOSTNAME_SUFFIX}
+          - name: HOSTNAME_HTTP
+            value: web-ui:8080
+          image: web-ui
+          imagePullPolicy: Always
+          name: web-ui
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          livenessProbe:
+            failureThreshold: 10
+            exec:
+              command:
+                - curl
+                - '-f'
+                - 'http://localhost:8080'
+            initialDelaySeconds: 60
+            timeoutSeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+          readinessProbe:
+            failureThreshold: 10
+            exec:
+              command:
+                - curl
+                - '-f'
+                - 'http://localhost:8080'
+            initialDelaySeconds: 60
+            timeoutSeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 50m
+              memory: 128Mi
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - web-ui
+        from:
+          kind: ImageStreamTag
+          name: web-ui:${APP_VERSION}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: web-ui
+      comp-required: "true"
+    name: web-ui
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: web-ui
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: web-ui
+    labels:
+      app: web-ui
+      comp-required: "true"
+  spec:
+    host: web-ui-${HOSTNAME_SUFFIX}
+    to:
+      kind: Service
+      name: web-ui
+# Coolstore Gateway
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: coolstore-gw
+    labels:
+      app: coolstore-gw
+      comp-required: "true"
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: coolstore-gw
+    strategy:
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: coolstore-gw
+          deploymentconfig: coolstore-gw
+        name: coolstore-gw
+      spec:
+        containers:
+        - env:
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: CART_ENDPOINT
+            value: cart-${HOSTNAME_SUFFIX}
+          - name: INVENTORY_ENDPOINT
+            value: inventory-${HOSTNAME_SUFFIX}
+          - name: CATALOG_ENDPOINT
+            value: catalog-${HOSTNAME_SUFFIX}
+          - name: RATING_ENDPOINT
+            value: rating-${HOSTNAME_SUFFIX}
+          image: library/coolstore-gw:${APP_VERSION}
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - '-f'
+                - 'http://localhost:8081/health'
+            initialDelaySeconds: 30
+            failureThreshold: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          name: coolstore-gw
+          ports:
+          - containerPort: 8778
+            name: jolokia
+          readinessProbe:
+            exec:
+              command:
+                - curl
+                - '-f'
+                - 'http://localhost:8081/health'
+            initialDelaySeconds: 30
+            failureThreshold: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 1
+              memory: 2Gi
+            requests:
+              cpu: 200m
+              memory: 512Mi
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - coolstore-gw
+        from:
+          kind: ImageStreamTag
+          name: coolstore-gw:${APP_VERSION}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: coolstore-gw
+      hystrix.enabled: "true"
+      comp-required: "true"
+    name: coolstore-gw
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: coolstore-gw
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: coolstore-gw
+    labels:
+      app: coolstore-gw
+      comp-required: "true"
+  spec:
+    host: gw-${HOSTNAME_SUFFIX}
+    to:
+      kind: Service
+      name: coolstore-gw
+# Inventory Service
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: inventory
+    labels:
+      app: inventory
+      uses-database: "true"
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: inventory
+    strategy:
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: inventory
+          deploymentconfig: inventory
+        name: inventory
+      spec:
+        containers:
+        - env:
+          - name: OPENSHIFT_KUBE_PING_LABELS
+            value: application=inventory
+          - name: OPENSHIFT_KUBE_PING_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: MQ_CLUSTER_PASSWORD
+            value: 7mzX0pLV03
+          - name: JGROUPS_CLUSTER_PASSWORD
+            value: CqUo3fYDTv
+          - name: AUTO_DEPLOY_EXPLODED
+            value: "false"
+          - name: DB_SERVICE_PREFIX_MAPPING
+            value: inventory-postgresql=DB
+          - name: DB_JNDI
+            value: java:jboss/datasources/InventoryDS
+          - name: DB_USERNAME
+            value: ${INVENTORY_DB_USERNAME}
+          - name: DB_PASSWORD
+            value: ${INVENTORY_DB_PASSWORD}
+          - name: DB_DATABASE
+            value: inventorydb
+          image: inventory
+          imagePullPolicy: Always
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /opt/eap/bin/jboss-cli.sh
+                - -c
+                - :shutdown(timeout=60)
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /api/availability/1
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: inventory
+          ports:
+          - containerPort: 8778
+            name: jolokia
+            protocol: TCP
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          - containerPort: 8888
+            name: ping
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /api/availability/1
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 1
+              memory: 2Gi
+            requests:
+              cpu: 100m
+              memory: 1Gi
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 75
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - inventory
+        from:
+          kind: ImageStreamTag
+          name: inventory:${APP_VERSION}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      service.alpha.openshift.io/dependencies: '[{"name":"inventory-postgresql","namespace":"","kind":"Service"}]'
+    labels:
+      app: inventory
+    name: inventory
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: inventory
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: inventory
+    name: inventory
+  spec:
+    host: inventory-${HOSTNAME_SUFFIX}
+    to:
+      kind: Service
+      name: inventory
+      weight: 100
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: inventory-postgresql
+    labels:
+      app: inventory
+      comp-type: database
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: inventory-postgresql
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: inventory
+          comp-type: database
+          deploymentconfig: inventory-postgresql
+        name: inventory-postgresql
+      spec:
+        containers:
+        - env:
+          - name: POSTGRESQL_USER
+            value: ${INVENTORY_DB_USERNAME}
+          - name: POSTGRESQL_PASSWORD
+            value: ${INVENTORY_DB_PASSWORD}
+          - name: POSTGRESQL_DATABASE
+            value: inventorydb
+          image: postgresql
+          imagePullPolicy: Always
+          name: inventory-postgresql
+          ports:
+          - containerPort: 5432
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /var/lib/pgsql/data
+            name: inventory-postgresql-data
+          livenessProbe:
+            initialDelaySeconds: 30
+            failureThreshold: 10
+            periodSeconds: 10
+            tcpSocket:
+              port: 5432
+            timeoutSeconds: 1
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -i
+              - -c
+              - psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c 'SELECT 1'
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 10
+            periodSeconds: 5
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 50m
+              memory: 256Mi
+        terminationGracePeriodSeconds: 60
+        volumes:
+        - name: inventory-postgresql-data
+          persistentVolumeClaim:
+            claimName: inventory-postgresql-pv
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - inventory-postgresql
+        from:
+          kind: ImageStreamTag
+          name: postgresql:9.6
+          namespace: openshift
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: inventory
+    name: inventory-postgresql
+  spec:
+    ports:
+    - port: 5432
+      targetPort: 5432
+    selector:
+      deploymentconfig: inventory-postgresql
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: inventory
+    name: inventory-postgresql-pv
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+# Catalog Service
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: catalog
+    labels:
+      app: catalog
+      comp-required: "true"
+      uses-database: "true"
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: catalog
+    strategy:
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: catalog
+          deploymentconfig: catalog
+        name: catalog
+      spec:
+        containers:
+        - env:
+          - name: JWS_ADMIN_USERNAME
+            value: Skq3VtCd
+          - name: JWS_ADMIN_PASSWORD
+            value: oktt6yhw
+          - name: DB_USERNAME
+            value: ${CATALOG_DB_USERNAME}
+          - name: DB_PASSWORD
+            value: ${CATALOG_DB_PASSWORD}
+          - name: DB_NAME
+            value: catalogdb
+          - name: DB_SERVER
+            value: catalog-mongodb
+          image: catalog
+          imagePullPolicy: Always
+          name: catalog
+          ports:
+          - containerPort: 8778
+            name: jolokia
+            protocol: TCP
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - '-f'
+                - 'http://localhost:8080/api/products'
+            initialDelaySeconds: 60
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 10
+          readinessProbe:
+            exec:
+              command:
+                - curl
+                - '-f'
+                - 'http://localhost:8080/api/products'
+            initialDelaySeconds: 60
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 10
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 75
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - catalog
+        from:
+          kind: ImageStreamTag
+          name: catalog:${APP_VERSION}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      service.alpha.openshift.io/dependencies: '[{"name":"catalog-mongodb","namespace":"","kind":"Service"}]'
+    labels:
+      app: catalog
+      comp-required: "true"
+    name: catalog
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: catalog
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: catalog
+      comp-required: "true"
+    name: catalog
+  spec:
+    host: catalog-${HOSTNAME_SUFFIX}
+    to:
+      kind: Service
+      name: catalog
+      weight: 100
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: catalog
+      comp-required: "true"
+    name: catalog-mongodb
+  spec:
+    ports:
+    - name: mongo
+      port: 27017
+      protocol: TCP
+      targetPort: 27017
+    selector:
+      deploymentconfig: catalog-mongodb
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: catalog
+      comp-type: database
+      comp-required: "true"
+    name: catalog-mongodb
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: catalog-mongodb
+    strategy:
+      recreateParams:
+        timeoutSeconds: 600
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: catalog
+          comp-type: database
+          deploymentconfig: catalog-mongodb
+      spec:
+        containers:
+        - env:
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: MONGODB_USER
+            value: ${CATALOG_DB_USERNAME}
+          - name: MONGODB_PASSWORD
+            value: ${CATALOG_DB_PASSWORD}
+          - name: MONGODB_DATABASE
+            value: catalogdb
+          - name: MONGODB_ADMIN_PASSWORD
+            value: ${CATALOG_DB_PASSWORD}
+          image: mongodb
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 10
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 27017
+            timeoutSeconds: 1
+          name: catalog-mongodb
+          ports:
+          - containerPort: 27017
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -i
+              - -c
+              - mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD
+                --eval="quit()"
+            failureThreshold: 10
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          securityContext:
+            capabilities: {}
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /var/lib/mongodb/data
+            name: mongodb-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: mongodb-data
+          persistentVolumeClaim:
+            claimName: catalog-mongodb-pv
+    test: false
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - catalog-mongodb
+        from:
+          kind: ImageStreamTag
+          name: mongodb:3.2
+          namespace: openshift
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: catalog
+      comp-required: "true"
+    name: catalog-mongodb-pv
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+# Rating Service
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: rating
+    labels:
+      app: rating
+      uses-database: "true"
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: rating
+    strategy:
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: rating
+          deploymentconfig: rating
+        name: rating
+      spec:
+        containers:
+        - env:
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          image: rating
+          imagePullPolicy: Always
+          name: rating
+          ports:
+          - containerPort: 8778
+            name: jolokia
+            protocol: TCP
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          livenessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: "/health/liveness"
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreashold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: "/health/readiness"
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreashold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              memory: 200Mi
+        terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 75
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - rating
+        from:
+          kind: ImageStreamTag
+          name: rating:${APP_VERSION}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      service.alpha.openshift.io/dependencies: '[{"name":"rating-mongodb","namespace":"","kind":"Service"}]'
+    labels:
+      app: rating
+    name: rating
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: rating
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: rating
+    name: rating
+  spec:
+    host: rating-${HOSTNAME_SUFFIX}
+    to:
+      kind: Service
+      name: rating
+      weight: 100
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: rating-config
+    labels:
+      app: rating
+  data:
+    rating-config.yaml: |-
+      rating.http.port: 8080
+      connection_string: mongodb://rating-mongodb:27017
+      db_name: ratingdb
+      username: ${RATING_DB_USERNAME}
+      password: ${RATING_DB_PASSWORD}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: rating
+    name: rating-mongodb
+  spec:
+    ports:
+    - name: mongo
+      port: 27017
+      protocol: TCP
+      targetPort: 27017
+    selector:
+      deploymentconfig: rating-mongodb
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: rating
+      comp-type: database
+    name: rating-mongodb
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: rating-mongodb
+    strategy:
+      recreateParams:
+        post:
+          execNewPod:
+            command:
+              - /bin/sh
+              - -i
+              - -c
+              - env && while ! mongo ${RATING_MONGODB_SERVICE_HOST}:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD --eval="$MONGODB_INIT" > /dev/null 2>&1; do echo "waiting for mongo ..."; sleep 5; done
+            containerName: rating-mongodb
+            env:
+            - name: MONGODB_INIT
+              value: db.ratings.insert({"_id":"329299","itemId":"329299","rating":5.0,"count":1});
+                db.ratings.insert({"_id":"329199","itemId":"329199","rating":1.0,"count":12});
+                db.ratings.insert({"_id":"165613","itemId":"165613","rating":2.3,"count":31});
+                db.ratings.insert({"_id":"165614","itemId":"165614","rating":3.0,"count":51});
+                db.ratings.insert({"_id":"165954","itemId":"165954","rating":4.0,"count":66});
+                db.ratings.insert({"_id":"444434","itemId":"444434","rating":5.0,"count":76});
+                db.ratings.insert({"_id":"444435","itemId":"444435","rating":4.0,"count":83});
+                db.ratings.insert({"_id":"444436","itemId":"444436","rating":3.0,"count":123});
+          failurePolicy: ignore
+        timeoutSeconds: 600
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: rating
+          comp-type: database
+          deploymentconfig: rating-mongodb
+      spec:
+        containers:
+        - env:
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: MONGODB_USER
+            value: ${RATING_DB_USERNAME}
+          - name: MONGODB_PASSWORD
+            value: ${RATING_DB_PASSWORD}
+          - name: MONGODB_DATABASE
+            value: ratingdb
+          - name: MONGODB_ADMIN_PASSWORD
+            value: ${RATING_DB_PASSWORD}
+          image: mongodb
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 10
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 27017
+            timeoutSeconds: 1
+          name: rating-mongodb
+          ports:
+          - containerPort: 27017
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -i
+              - -c
+              - mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD
+                --eval="quit()"
+            failureThreshold: 10
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          securityContext:
+            capabilities: {}
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /var/lib/mongodb/data
+            name: mongodb-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: mongodb-data
+          persistentVolumeClaim:
+            claimName: rating-mongodb-pv
+    test: false
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - rating-mongodb
+        from:
+          kind: ImageStreamTag
+          name: mongodb:3.2
+          namespace: openshift
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: rating
+    name: rating-mongodb-pv
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+# Cart Service
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: cart
+    labels:
+      app: cart
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: cart
+    strategy:
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: cart
+          deploymentconfig: cart
+        name: cart
+      spec:
+        containers:
+        - env:
+          - name: CATALOG_ENDPOINT
+            value: "http://catalog:8080"
+          - name: PRICING_ENDPOINT
+            value: "http://pricing:8080"
+          - name: KIE_CONTAINER_DEPLOYMENT
+            value: ${KIE_CONTAINER_DEPLOYMENT}
+          - name: KIE_SERVER_USER
+            value: ${KIE_SERVER_USER}
+          - name: KIE_SERVER_PASSWORD
+            value: ${KIE_SERVER_PASSWORD}
+          - name: DATAGRID_HOST
+            value: datagrid-hotrod
+          - name: DATAGRID_PORT
+            value: "11333"
+          image: cart
+          imagePullPolicy: Always
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - '-f'
+                - 'http://localhost:8080/health'
+            initialDelaySeconds: 60
+            failureThreshold: 10
+            periodSeconds: 10
+          name: cart
+          ports:
+          - containerPort: 8778
+            name: jolokia
+            protocol: TCP
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          - containerPort: 8443
+            name: https
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - curl
+                - '-f'
+                - 'http://localhost:8080/health'
+            initialDelaySeconds: 60
+            failureThreshold: 10
+            periodSeconds: 10
+          resources:
+            limits:
+              cpu: 1
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 75
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - cart
+        from:
+          kind: ImageStreamTag
+          name: cart:${APP_VERSION}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: cart
+    name: cart
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: cart
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: cart
+    name: cart
+  spec:
+    host: cart-${HOSTNAME_SUFFIX}
+    to:
+      kind: Service
+      name: cart
+      weight: 100
+# Pricing Service
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: pricing
+    labels:
+      app: pricing
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: pricing
+    strategy:
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          application: pricing
+          deploymentconfig: pricing
+        name: pricing
+      spec:
+        containers:
+        - env:
+          - name: MQ_CLUSTER_PASSWORD
+            value: 7mzX0pLV03
+          - name: JGROUPS_CLUSTER_PASSWORD
+            value: CqUo3fYDTv
+          - name: AUTO_DEPLOY_EXPLODED
+            value: "false"
+          - name: KIE_CONTAINER_DEPLOYMENT
+            value: ${KIE_CONTAINER_DEPLOYMENT}
+          - name: KIE_SERVER_USER
+            value: ${KIE_SERVER_USER}
+          - name: KIE_SERVER_PASSWORD
+            value: ${KIE_SERVER_PASSWORD}
+          - name: OPENSHIFT_KUBE_PING_LABELS
+            value: application=pricing-service
+          - name: OPENSHIFT_KUBE_PING_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          image: pricing
+          imagePullPolicy: Always
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /opt/eap/bin/jboss-cli.sh
+                - -c
+                - :shutdown(timeout=60)
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /kie-server/docs/
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: pricing
+          ports:
+          - containerPort: 8778
+            name: jolokia
+            protocol: TCP
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          - containerPort: 8888
+            name: ping
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /kie-server/docs/
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 600Mi
+            requests:
+              memory: 200Mi
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 75
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - pricing
+        from:
+          kind: ImageStreamTag
+          name: pricing:${APP_VERSION}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: The pricing service's http port.
+    labels:
+      app: pricing
+    name: pricing
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: pricing
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      application: pricing
+    name: pricing
+  spec:
+    host: pricing-${HOSTNAME_SUFFIX}
+    to:
+      kind: Service
+      name: pricing
+      weight: 100
+# Review service
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: review
+    labels:
+      app: review
+      uses-database: "true"
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: review
+    strategy:
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: review
+          deploymentconfig: review
+        name: review
+      spec:
+        containers:
+        - env:
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: JAVA_OPTIONS
+            value: "-Dswarm.project.stage=production -Dswarm.project.stage.file=file:///app/config/review-config.yml"
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+          image: review
+          imagePullPolicy: Always
+          name: review
+          ports:
+          - containerPort: 8778
+            name: jolokia
+            protocol: TCP
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          livenessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: "/health"
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreashold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: "/health"
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreashold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              memory: 200Mi
+        volumes:
+          - configMap:
+              name: review-config
+              items:
+              - key: "review-config.yml"
+                path: "review-config.yml"
+            name: config
+        terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 75
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - review
+        from:
+          kind: ImageStreamTag
+          name: review:${APP_VERSION}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      service.alpha.openshift.io/dependencies: '[{"name":"review-postgresql","namespace":"","kind":"Service"}]'
+    labels:
+      app: review
+    name: review
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: review
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      application: review
+    name: review
+  spec:
+    host: review-${HOSTNAME_SUFFIX}
+    to:
+      kind: Service
+      name: review
+      weight: 100
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: review-postgresql
+    labels:
+      app: review
+      comp-type: database
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: review-postgresql
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: review
+          comp-type: database
+          deploymentconfig: review-postgresql
+        name: review-postgresql
+      spec:
+        containers:
+        - env:
+          - name: POSTGRESQL_USER
+            value: ${REVIEW_DB_USERNAME}
+          - name: POSTGRESQL_PASSWORD
+            value: ${REVIEW_DB_PASSWORD}
+          - name: POSTGRESQL_DATABASE
+            value: review
+          image: postgresql
+          imagePullPolicy: Always
+          name: review-postgresql
+          volumeMounts:
+          - mountPath: /var/lib/pgsql/data
+            name: review-postgresql-data
+          ports:
+          - containerPort: 5432
+            protocol: TCP
+          livenessProbe:
+            initialDelaySeconds: 30
+            tcpSocket:
+              port: 5432
+            timeoutSeconds: 1
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -i
+              - -c
+              - psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c 'SELECT 1'
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+        terminationGracePeriodSeconds: 60
+        volumes:
+        - name: review-postgresql-data
+          persistentVolumeClaim:
+            claimName: review-postgresql-pv
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - review-postgresql
+        from:
+          kind: ImageStreamTag
+          name: postgresql:9.6
+          namespace: openshift
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: review
+    name: review-postgresql-pv
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: review
+    name: review-postgresql
+  spec:
+    ports:
+    - port: 5432
+      targetPort: 5432
+    selector:
+      deploymentconfig: review-postgresql
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: review-config
+    labels:
+      app: review
+  data:
+    review-config.yml: |-
+      project:
+        stage: production
+      swarm:
+        datasources:
+          data-sources:
+            ReviewDS:
+              driver-name: postgresql
+              connection-url: jdbc:postgresql://review-postgresql:5432/review
+              user-name: ${REVIEW_DB_USERNAME}
+              password: ${REVIEW_DB_PASSWORD}
+# JBoss Data Grid
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: datagrid
+      application: datagrid
+      comp: datagrid
+    name: datagrid
+  spec:
+    replicas: 1
+    selector:
+      deploymentConfig: datagrid
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          application: datagrid
+          deploymentConfig: datagrid
+        name: datagrid
+      spec:
+        containers:
+        - env:
+          - name: USERNAME
+          - name: PASSWORD
+          - name: OPENSHIFT_KUBE_PING_LABELS
+            value: application=datagrid
+          - name: OPENSHIFT_KUBE_PING_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+          - name: INFINISPAN_CONNECTORS
+            value: hotrod
+          - name: CACHE_NAMES
+            value: cart
+          - name: HOTROD_SERVICE_NAME
+            value: datagrid-hotrod
+          - name: MEMCACHED_CACHE
+            value: default
+          - name: JGROUPS_CLUSTER_PASSWORD
+            value: BlonpvoQ
+          image: jboss-datagrid65-openshift
+          imagePullPolicy: Always
+          livenessProbe:
+            exec:
+              command:
+              - /bin/bash
+              - -c
+              - /opt/datagrid/bin/livenessProbe.sh
+            failureThreshold: 3
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: datagrid
+          ports:
+          - containerPort: 8778
+            name: jolokia
+            protocol: TCP
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          - containerPort: 8888
+            name: ping
+            protocol: TCP
+          - containerPort: 11222
+            name: hotrod-internal
+            protocol: TCP
+          - containerPort: 11333
+            name: hotrod
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - /bin/bash
+              - -c
+              - /opt/datagrid/bin/readinessProbe.sh
+            failureThreshold: 3
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - datagrid
+        from:
+          kind: ImageStreamTag
+          name: jboss-datagrid65-openshift:1.4
+          namespace: openshift
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: datagrid
+      application: datagrid
+    name: datagrid-hotrod
+  spec:
+    ports:
+    - port: 11333
+      protocol: TCP
+      targetPort: 11333
+    selector:
+      deploymentConfig: datagrid
+    sessionAffinity: None
+    type: ClusterIP
+parameters:
+- description: CoolStore application image version to be deployed (imagestreams should exist)
+  displayName: CoolStore image version
+  name: APP_VERSION
+  required: true
+  value: latest
+- description: Hostname suffix used for routes e.g. cart-<HOSTNAME_SUFFIX> inventory-<HOSTNAME_SUFFIX>
+  displayName: Hostname suffix used for routes
+  name: HOSTNAME_SUFFIX
+  required: true
+- description: Inventory Service database user name
+  from: user[a-zA-Z0-9]{3}
+  generate: expression
+  name: INVENTORY_DB_USERNAME
+  required: true
+- description: Inventory Service database user password
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: INVENTORY_DB_PASSWORD
+  required: true
+- description: Catalog Service database user name
+  from: user[a-zA-Z0-9]{3}
+  generate: expression
+  name: CATALOG_DB_USERNAME
+  required: true
+- description: Catalog Service database user password
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: CATALOG_DB_PASSWORD
+  required: true
+- description: Decision Server Username
+  name: KIE_SERVER_USER
+  required: true
+  value: brmsAdmin
+- description: Decision Server Password
+  from: '[a-zA-Z]{6}[0-9]{1}!'
+  generate: expression
+  name: KIE_SERVER_PASSWORD
+  required: true
+- description: Decision Server Coolstore Rules Container Spec
+  name: KIE_CONTAINER_DEPLOYMENT
+  required: true
+  value: CoolStoreRulesContainer=com.redhat:coolstore:2.0.0
+- description: Rating Service database user name
+  displayName: Rating Database username
+  from: user[a-zA-Z0-9]{3}
+  generate: expression
+  name: RATING_DB_USERNAME
+  required: true
+- description: Rating Service database user password
+  displayName: Rating Database password
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: RATING_DB_PASSWORD
+  required: true
+- description: Review Service database user name
+  displayName: Review Database username
+  from: user[a-zA-Z0-9]{3}
+  generate: expression
+  name: REVIEW_DB_USERNAME
+  required: true
+- description: Review Service database user password
+  displayName: Review Database password
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: REVIEW_DB_PASSWORD
+  required: true
