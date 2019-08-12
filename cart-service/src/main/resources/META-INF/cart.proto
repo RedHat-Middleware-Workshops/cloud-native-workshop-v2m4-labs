@@ -1,0 +1,32 @@
+package coolstore;
+
+message ShoppingCart {
+  required double cartItemTotal = 1;
+  required double cartItemPromoSavings = 2;
+  required double shippingTotal = 3;
+  required double shippingPromoSavings = 4;
+  required double cartTotal = 5;
+  required string cartId = 6;
+
+  repeated ShoppingCartItem shoppingCartItemList = 7;
+}
+
+message ShoppingCartItem {
+  required double price = 1;
+  required int32 quantity = 2;
+  required double promoSavings = 3;
+  required Product product = 4;
+}
+
+
+message Product {
+  required string itemId = 1;
+  required string name = 2;
+  required string desc = 3;
+  required double price = 4;
+}
+
+message Promotion {
+  required string itemId = 1;
+  required double percentOff = 2;
+}
