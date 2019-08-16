@@ -10,21 +10,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-@Path("/orders")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+// TODO: Add JAX-RS annotations here
+
 public class OrderResource {
 
-    @Inject OrderService orderService;
+    // TODO: Inject OrderService here
 
-    @GET
-    public List<Order> list() {
-        return orderService.list();
-    }
-
-    @POST
-    public List<Order> add(Order order) {
-        orderService.add(order);
-        return list();
-    }
+    // TODO: Add list(), add() methods here
+    
 }

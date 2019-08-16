@@ -13,43 +13,21 @@ import java.util.List;
 @ApplicationScoped
 public class OrderService {
 
-    @Inject MongoClient mongoClient;
+    // TODO: Inject MongoClient here 
 
     public List<Order> list(){
+        
         List<Order> list = new ArrayList<>();
-        MongoCursor<Document> cursor = getCollection().find().iterator();
-
-        try {
-            while (cursor.hasNext()) {
-                Document document = cursor.next();
-                Order order = new Order();
-                order.setId(document.getString("id"));
-                order.setCustomerName(document.getString("customerName"));
-                order.setCustomerEmail(document.getString("customerEmail"));
-                order.setOrderValue(document.getDouble("orderValue"));
-                order.setRetailPrice(document.getDouble("retailPrice"));
-                order.setDiscount(document.getDouble("discount"));
-                order.setShippingFee(document.getDouble("shippingFee"));
-                order.setShippingDiscount(document.getDouble("shippingDiscount"));
-                list.add(order);
-            }
-        } finally {
-            cursor.close();
-        }
+        
+        // TODO: Add a while loop to make an order lists using MongoCursor here 
+        
         return list;
     }
 
     public void add(Order order){
-        Document document = new Document()
-                .append("id", order.getId())
-                .append("customerName", order.getCustomerName())
-                .append("customerEmail", order.getCustomerEmail())
-                .append("orderValue", order.getOrderValue())
-                .append("retailPrice", order.getRetailPrice())
-                .append("discount", order.getDiscount())
-                .append("shippingFee", order.getShippingFee())
-                .append("shippingDiscount", order.getShippingDiscount());
-        getCollection().insertOne(document);
+
+        // TODO: Add to create a Document based order here 
+        
     }
 
     private MongoCollection getCollection(){
