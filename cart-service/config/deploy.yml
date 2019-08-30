@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-service
+  labels:
+    app: cart-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart-service
+  template:
+    metadata:
+      labels:
+        app: cart-service
+    spec:
+      containers:
+        - name: cart-service
+          image: quay.io/sshaaf/cart-service:latest
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /work/config
+              name: config
+      volumes:
+        - configMap:
+            defaultMode: 420
+            items:
+              - key: application.properties
+                path: application.properties
+            name: configmap-cart-service
+          name: config

@@ -1,0 +1,12 @@
+apiVersion: v1
+data:
+  application.properties: |-
+    quarkus.http.port=8080
+    quarkus.swagger-ui.always-include=true
+    quarkus.infinispan-client.server-list=datagrid-service:11222
+
+kind: ConfigMap
+metadata:
+  name: configmap-cart-service
+
+
