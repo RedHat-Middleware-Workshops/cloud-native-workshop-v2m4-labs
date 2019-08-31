@@ -1,11 +1,14 @@
-package com.redhat.cloudnative.model;
+package com.redhat.cloudnative.model.order;
 
 public class CreditCard {
 
     // "creditCard": {"number": "4232454678667866","expiration": "04/22","nameOnCard": "Jane G Doe"}
-    String number = null;
-    String expiration = null;
-    String nameOnCard = null;
+    private String number = null;
+    private String expiration = null;
+    private String nameOnCard = null;
+
+    public CreditCard() {
+    }
 
     public CreditCard(String number, String expiration, String nameOnCard) {
         this.number = number;

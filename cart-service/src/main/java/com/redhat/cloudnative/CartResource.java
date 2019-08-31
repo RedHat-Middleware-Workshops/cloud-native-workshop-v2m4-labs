@@ -1,6 +1,6 @@
 package com.redhat.cloudnative;
 
-import com.redhat.cloudnative.model.Order;
+import com.redhat.cloudnative.model.order.Order;
 import com.redhat.cloudnative.model.ShoppingCart;
 import com.redhat.cloudnative.service.ShoppingCartService;
 import io.vertx.core.json.Json;
@@ -84,16 +84,17 @@ public class CartResource {
 
     @POST
     @Path("/checkout/{cartId}")
-    @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "checkout")
-    public ShoppingCart checkout(Order order) {
-        log.info("Checkout invoked");
-        sendOrder(order);
-        return shoppingCartService.checkout(order.getKey());
+    public ShoppingCart checkout(@PathParam("cartId") String cartId, Order order) {
+        sendOrder(order, cartId);
+        return shoppingCartService.checkout(cartId);
     }
 
-    private void sendOrder(Order order) {
+    private void sendOrder(Order order, String cartId) {
+        order.setKey(cartId);
+        order.setTotal(shoppingCartService.getShoppingCart(cartId).getCartTotal()+"");
         producer.send(new ProducerRecord<String, String>(ordersTopic, Json.encode(order)));
         log.info("Sent message: "+Json.encode(order));
     }

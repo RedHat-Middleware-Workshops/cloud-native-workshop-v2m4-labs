@@ -1,13 +1,19 @@
-package com.redhat.cloudnative.model;
+package com.redhat.cloudnative.model.order;
+
+import java.util.Objects;
 
 public class Order {
 // {"key": "12321","total": "232.23", "creditCard": {"number": "4232454678667866","expiration": "04/22","nameOnCard": "Jane G Doe"}, "billingAddress": "123 Anystreet, Pueblo, CO 32213", "name": "Jane Doe"}
 
-    String key = null;
-    String total = null;
-    CreditCard card = null;
-    String billingAddress = null;
-    String name = null;
+    private String key = null;
+    private String total = null;
+    private CreditCard card = null;
+    private String billingAddress = null;
+    private String name = null;
+
+
+    public Order() {
+    }
 
     public Order(String key, String total, CreditCard card, String billingAddress, String name) {
         this.key = key;
@@ -55,5 +61,21 @@ public class Order {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Order)) {
+            return false;
+        }
+
+        Order other = (Order) obj;
+
+        return Objects.equals(other.name, this.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.name);
     }
 }
