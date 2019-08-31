@@ -1,0 +1,16 @@
+apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app: cart-service
+      expose: 'true'
+    name: cart-service
+  spec:
+    host: 'cart-service.apps.cluster-cph-1b40.cph-1b40.open.redhat.com'
+    port:
+      targetPort: http
+    to:
+      kind: Service
+      name: cart-service
+      weight: 100
+    wildcardPolicy: None

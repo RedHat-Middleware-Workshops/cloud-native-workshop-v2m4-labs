@@ -1,6 +1,5 @@
 package com.redhat.cloudnative;
 
-import com.redhat.cloudnative.model.ShoppingCart;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
@@ -11,21 +10,28 @@ import static org.hamcrest.CoreMatchers.is;
 public class CartResourceTest {
 
     @Test
-    public void testHelloEndpoint() {
-        given()
-          .when().get("/cart")
-          .then()
-             .statusCode(200)
-             .body(is("hello"));
+    public void get() {
+        given().when().get("/cart/1111").then().statusCode(200);
     }
 
 
     @Test
-    public void should_get_initialized_shopping_cart_in_case_of_not_exists() {
-        given()
-                .when().get("/cart/1111")
-                .then()
-                .statusCode(200);
+    void add() {
+        given().when().get("/cart/1111").then().statusCode(200);
+        given().when().post("/cart/1111/2222/4").then().statusCode(200);
     }
 
+    @Test
+    void delete() {
+        // "/{cartId}/{itemId}/{quantity}
+        given().when().get("/cart/1111").then().statusCode(200);
+        given().when().post("/cart/1111/2222/4").then().statusCode(200);
+        given().when().delete("/cart/1111/2222/2").then().statusCode(200);
+    }
+
+    @Test
+    void checkout() {
+        given().when().get("/cart/1111").then().statusCode(200);
+        given().when().post("/checkout/1111").then().statusCode(404);
+    }
 }

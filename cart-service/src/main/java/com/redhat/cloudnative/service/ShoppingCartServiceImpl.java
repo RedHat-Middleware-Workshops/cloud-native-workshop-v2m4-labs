@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.redhat.cloudnative.service.CacheService.CART_CACHE;
+
 
 @ApplicationScoped
 public class ShoppingCartServiceImpl implements ShoppingCartService{
@@ -26,7 +26,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService{
     private static final Logger log = LoggerFactory.getLogger(ShoppingCartServiceImpl.class);
 
     @Inject
-    @Remote(CART_CACHE)
+    @Remote("default")
     RemoteCache<String, ShoppingCart> carts;
 
     @Inject
