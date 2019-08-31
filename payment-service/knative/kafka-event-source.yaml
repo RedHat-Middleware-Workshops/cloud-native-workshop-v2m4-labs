@@ -1,0 +1,19 @@
+apiVersion: sources.eventing.knative.dev/v1alpha1
+kind: KafkaSource
+metadata:
+  name: kafka-source
+spec:
+  consumerGroup: payment-consumer-group
+  bootstrapServers: my-cluster-kafka-bootstrap:9092
+  topics: Orders
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  sink:
+    apiVersion: serving.knative.dev/v1alpha1
+    kind: Service
+    name: payment-service
