@@ -10,7 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/services")
+@RequestMapping("/api")
 public class CatalogEndpoint {
 
     @Autowired
@@ -18,12 +18,14 @@ public class CatalogEndpoint {
 
     @ResponseBody
     @GetMapping("/products")
+    @CrossOrigin
     public ResponseEntity<List<Product>> readAll() {
         return new ResponseEntity<List<Product>>(catalogService.readAll(),HttpStatus.OK);
     }
 
     @ResponseBody
     @GetMapping("/product/{id}")
+    @CrossOrigin
     public ResponseEntity<Product> read(@PathVariable("id") String id) {
         return new ResponseEntity<Product>(catalogService.read(id),HttpStatus.OK);
     }
