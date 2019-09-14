@@ -5,15 +5,8 @@ metadata:
 spec:
   consumerGroup: payment-consumer-group
   bootstrapServers: my-cluster-kafka-bootstrap:9092
-  topics: Orders
-  resources:
-    limits:
-      cpu: 250m
-      memory: 512Mi
-    requests:
-      cpu: 250m
-      memory: 512Mi
+  topics: orders
   sink:
     apiVersion: serving.knative.dev/v1alpha1
     kind: Service
-    name: payment-service
+    name: payment

@@ -1,15 +1,15 @@
 apiVersion: serving.knative.dev/v1alpha1
 kind: Service
 metadata:
-  name: payment-service
+  name: payment
 spec:
   template:
     metadata:
-      name: payment-service-v1
+      name: payment-v1
       annotations:
         # disable istio-proxy injection
         sidecar.istio.io/inject: "false"
     spec:
       containers:
         # Replace Project name userXX-cloudnativeapps with project in which payment is deployed
-      - image: image-registry.openshift-image-registry.svc:5000/userXX-cloudnativeapps/payment-service:latest
+      - image: image-registry.openshift-image-registry.svc:5000/userXX-cloudnativeapps/payment:latest
