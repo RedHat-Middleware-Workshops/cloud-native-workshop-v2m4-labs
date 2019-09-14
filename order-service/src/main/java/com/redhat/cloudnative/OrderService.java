@@ -30,6 +30,33 @@ public class OrderService {
         
     }
 
+    public void updateStatus(String orderId, String status){
+
+        Document searchQuery = new Document().append("id", orderId);
+        MongoCursor<Document> cursor = getCollection().find().iterator();
+        try {
+            while (cursor.hasNext()) {
+                Document document = cursor.next();
+                if ( document.getString("id").equals(orderId) ) {
+                    Document newDocument = new Document();
+                    newDocument.append("id", orderId);
+                    newDocument.append("name", document.getString("name"));
+                    newDocument.append("total", document.getString("total"));
+                    newDocument.append("ccNumber", document.getString("ccNumber"));
+                    newDocument.append("ccExp", document.getString("ccExp"));
+                    newDocument.append("billingAddress", document.getString("billingAddress"));
+                    newDocument.append("status", document.getString("status"));
+                    Document update = new Document();
+                    update.append("$set", newDocument);
+                    getCollection().updateOne(searchQuery, update);
+                    break;
+                }
+            }
+        } finally {
+            cursor.close();
+        }
+    }
+    
     private MongoCollection getCollection(){
         return mongoClient.getDatabase("order").getCollection("order");
     }
