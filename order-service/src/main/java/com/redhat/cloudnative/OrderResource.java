@@ -17,6 +17,6 @@ public class OrderResource {
 
     // TODO: Inject OrderService here
 
-    // TODO: Add list(), add() methods here
+    // TODO: Add list(), add(), updateStatus() methods here
     
 }
