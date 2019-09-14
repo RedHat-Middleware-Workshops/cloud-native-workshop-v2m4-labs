@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('app').directive('starRating',
+ angular.module('app').directive('starRating',
     function() {
         return {
             restrict : 'A',
@@ -25,7 +25,7 @@ angular.module('app').directive('starRating',
                     }
                 };
 
-                scope.toggle = function(index) {
+                 scope.toggle = function(index) {
                     scope.ratingValue = index + 1;
                     scope.onRatingSelected({
                         itemId: scope.itemId,
@@ -33,7 +33,7 @@ angular.module('app').directive('starRating',
                     });
                 };
 
-                scope.$watch('ratingValue',
+                 scope.$watch('ratingValue',
                     function(oldVal, newVal) {
                         if (newVal) {
                             updateStars();

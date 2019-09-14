@@ -14,16 +14,19 @@
     "cors": "^2.8.3",
     "express": "^4.13.4",
     "keycloak-connect": "^3.1.0",
-    "request": "^2.74.0"
+    "request": "^2.74.0",
+    "bower": ">=1.7.9"
   },
   "devDependencies": {
     "bower": ">=1.7.9",
-    "bower-nexus3-resolver": "*"
+    "bower-nexus3-resolver": "*",
+    "nodeshift": "^3.1.1"
   },
   "engines": {
     "node": ">=0.10.10"
   },
   "scripts": {
-    "postinstall": "node_modules/.bin/bower --config.registry.search=${BOWER_MIRROR} install"
+    "nodeshift": "nodeshift",
+    "postinstall": "node_modules/.bin/bower install"
   }
 }

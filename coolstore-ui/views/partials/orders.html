@@ -1,0 +1,22 @@
+<table class="table table-striped table-bordered table-hover" id="table1">
+  <thead>
+    <tr>
+      <th>Order Id</th>
+      <th>Name</th>
+      <th>Price</th>
+      <th>Credit Card Number</th>
+      <th>Credit Card Expiration</th>
+      <th>Billing Address</th>
+      <th>Payment Status</th>
+    </tr>
+  </thead>
+  <tr ng-repeat="order in orders">
+    <td>{{ order.orderId }}</td>
+    <td>{{ order.name }}</td>
+    <td>{{ order.price | currency }}</td>
+    <td>{{ order.ccNumber }}</td>
+    <td>{{ order.ccExp }}</td>
+    <td>{{ order.billingAddress }}</td>
+    <td><span style="font-weight:bold">{{ order.status }}</span></td>
+  </tr>
+</table>

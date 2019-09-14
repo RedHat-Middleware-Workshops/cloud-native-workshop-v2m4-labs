@@ -3,8 +3,8 @@
 angular.module('app')
 
     .controller("HomeController",
-        ['$scope', '$http', '$filter', '$modal', 'Notifications', 'cart', 'catalog', 'Auth', 'Rating',
-            function ($scope, $http, $filter, $modal, Notifications, cart, catalog, $auth, Rating) {
+        ['$scope', '$http', '$filter', '$modal', 'Notifications', 'cart', 'catalog', 'Auth',
+            function ($scope, $http, $filter, $modal, Notifications, cart, catalog, $auth) {
 
                 $scope.products = [];
                 $scope.addToCart = function (item) {
@@ -26,42 +26,13 @@ angular.module('app')
                     $auth.login();
                 };
 
-                $scope.rateFunction = function(itemId, rating)
-                {
-                    Rating.postRating(itemId, rating).then(function(newRate) {
-                        $scope.products.forEach(function(item) {
-                            if (item.product.itemId === itemId) {
-                                item.product.rating.rating = rating;
-                                item.product.rating.rated = true;
-                                item.product.rating.count++;
-                            }
-                        });
-                    }, function(err) {
-                        Notifications.error("Error saving rating: " + err.statusText);
-                    });
-                };
-
-                $scope.showReviews = function(product) {
-                    $modal.open({
-                        templateUrl: 'partials/reviews.html',
-                        controller: 'ReviewController',
-                        size: 'lg',
-                        resolve: {
-                            product: function () {
-                                return product
-                            }
-
-                        }
-                    });
-                };
-
                 // initialize products
                 catalog.getProducts().then(function (data) {
                     if (data.error != undefined && data.error != "") {
                         Notifications.error("Error retrieving products: " + data.error);
                         return;
                     }
-                    
+
                     $scope.products = data.map(function (el) {
                         return {
                             quantity: "1",
@@ -75,25 +46,11 @@ angular.module('app')
 
             }])
 
-    .controller("ReviewController",
-        ['$scope', '$http', 'Notifications', 'product', 'review',
-            function ($scope, $http, Notifications, product, review) {
-
-                $scope.product = product;
-                $scope.reviews = null;
-
-                review.getReviews(product.itemId).then(function(reviews) {
-                    $scope.reviews = reviews;
-                }, function(err) {
-                    Notifications.error("Error fetching reviews for " + product.name + ": " + err.statusText);
-                });
-            }])
-
     .controller("CartController",
         ['$scope', '$http', 'Notifications', 'cart', 'Auth',
             function ($scope, $http, Notifications, cart, $auth) {
 
-                function reset() {
+                 function reset() {
                     $scope.cart = cart.getCart();
                     $scope.items = $scope.cart.shoppingCartItemList;
 
@@ -139,6 +96,14 @@ angular.module('app')
                     cart.reset();
                 });
 
+                $scope.checkout_withBilling = function (ccinfo) {
+                    cart.checkout_withBilling(ccinfo).then(function (cartData) {
+                        }, function (err) {
+                            Notifications.error("Error checking out: " + err.statusText);
+                        });
+                   };
+
+                // DEPRECATED: now use checkout_withBilling(ccinfo)
                 $scope.checkout = function () {
                     cart.checkout().then(function (cartData) {
                     }, function (err) {
@@ -208,4 +173,21 @@ angular.module('app')
                 $scope.isActive = function (loc) {
                     return loc === $location.path();
                 }
-            }]);
+            }])
+    .controller("OrdersController",
+        ['orders','$scope',
+            function (orders,$scope) {
+                orders.getOrders().then(function (orders) { $scope.orders = orders; });
+                $scope.isLoggedIn = function () {
+                    return $auth.loggedIn;
+                };
+                $scope.ssoEnabled = function () {
+                    return $auth.ssoEnabled;
+                };
+
+                $scope.login = function () {
+                    $auth.login();
+                };
+            }
+        ]
+    );

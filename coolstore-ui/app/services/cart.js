@@ -4,11 +4,30 @@ angular.module("app")
 
 .factory('cart', ['$http', '$q', 'COOLSTORE_CONFIG', 'Auth', '$location', function($http, $q, COOLSTORE_CONFIG, $auth, $location) {
 	var factory = {}, cart, products, cartId, baseUrl;
-	if ($location.protocol() === 'https') {
-		baseUrl = (COOLSTORE_CONFIG.SECURE_API_ENDPOINT.startsWith("https://") ? COOLSTORE_CONFIG.SECURE_API_ENDPOINT : "https://" + COOLSTORE_CONFIG.SECURE_API_ENDPOINT + '.' + $location.host().replace(/^.*?\.(.*)/g,"$1")) + '/api/cart';
-	} else {
-		baseUrl = (COOLSTORE_CONFIG.API_ENDPOINT.startsWith("http://") ? COOLSTORE_CONFIG.API_ENDPOINT : "http://" + COOLSTORE_CONFIG.API_ENDPOINT + '.' + $location.host().replace(/^.*?\.(.*)/g,"$1")) + '/api/cart';
-	}
+
+ 	baseUrl = $location.protocol() + '://cart-' + COOLSTORE_CONFIG.OCP_NAMESPACE + '.' + $location.host().replace(/^.*?\.(.*)/g,"$1") + '/api/cart';
+	// Following used for local testing
+ 	// baseUrl = 'http://localhost:8081/api/cart';
+
+
+	factory.checkout_withBilling = function(ccinfo){
+        var deferred = $q.defer();
+        let billingInfo = {"key": cartId ,"total": cart.total, "creditCard": {"number": ccinfo.creditCard,"expiration": ccinfo.month+"/"+ccinfo.year,"nameOnCard": ccinfo.nameOnCard}, "billingAddress": ccinfo.shippingAddress, "name": ccinfo.nameOnCard};
+        $http({
+            method:'POST',
+            url: baseUrl + '/checkout/' + cartId,
+            data: billingInfo,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(function(resp) {
+            cart = resp.data;
+            deferred.resolve(resp.data);
+        }, function(err) {
+            deferred.reject(err);
+        });
+        return deferred.promise;
+    };
 
 	factory.checkout = function() {
 		var deferred = $q.defer();

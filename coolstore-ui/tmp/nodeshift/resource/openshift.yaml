@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: List
+items:
+  - apiVersion: apps.openshift.io/v1
+    kind: DeploymentConfig
+    metadata:
+      name: coolstore-ui
+      namespace: user0-cloudnativeapps
+      labels:
+        project: coolstore-ui
+        version: 1.0.0
+        provider: nodeshift
+        app: coolstore-ui
+      annotations:
+        nodeshift/git-branch: master
+        nodeshift/git-commit: c4682a8004494e6d171074d5b32db5a18ef68dd6
+    spec:
+      replicas: 1
+      revisionHistoryLimit: 2
+      selector:
+        app: coolstore-ui
+        project: coolstore-ui
+        provider: nodeshift
+      triggers:
+        - type: ConfigChange
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - coolstore-ui
+            from:
+              kind: ImageStreamTag
+              namespace: user0-cloudnativeapps
+              name: 'coolstore-ui:latest'
+      template:
+        metadata:
+          labels:
+            project: coolstore-ui
+            version: 1.0.0
+            provider: nodeshift
+            app: coolstore-ui
+          annotations:
+            nodeshift/git-branch: master
+            nodeshift/git-commit: c4682a8004494e6d171074d5b32db5a18ef68dd6
+        spec:
+          containers:
+            - image: coolstore-ui
+              name: coolstore-ui
+              securityContext:
+                privileged: false
+              ports:
+                - containerPort: 8080
+                  name: http
+                  protocol: TCP
+              env: []
+  - apiVersion: v1
+    kind: Service
+    spec:
+      selector:
+        project: coolstore-ui
+        provider: nodeshift
+      ports:
+        - protocol: TCP
+          port: 8080
+          targetPort: 8080
+          name: http
+      type: ClusterIP
+    metadata:
+      name: coolstore-ui
+      namespace: user0-cloudnativeapps
+      labels:
+        project: coolstore-ui
+        version: 1.0.0
+        provider: nodeshift
+      annotations:
+        nodeshift/git-branch: master
+        nodeshift/git-commit: c4682a8004494e6d171074d5b32db5a18ef68dd6

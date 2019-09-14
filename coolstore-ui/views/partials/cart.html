@@ -54,15 +54,9 @@
 			</h2>
 		</div>
 		<div class="panel-footer">
-			<button ng-if="ssoEnabled() && isLoggedIn()" ng-disabled="cart.shoppingCartItemList.length <= 0"
+			<button ng-disabled="cart.shoppingCartItemList.length < 0"
 				class="btn btn-primary btn-lg" data-toggle="modal"
 				data-target="#checkoutModal" type="button">Checkout</button>
-
-			<button ng-if="ssoEnabled() && !isLoggedIn()" ng-click="login()"
-					class="btn btn-primary btn-lg" type="button">Sign in to purchase</button>
-
-			<button ng-if="!ssoEnabled()" ng-disabled="true"
-					title="SSO has not been configured" class="btn btn-primary btn-lg" type="button">Sign in unavailable</button>
 
 			<a ng-href="#/" class="btn btn-default btn-lg">Keep Shopping</a>
 		</div>
@@ -82,17 +76,58 @@
 				<h4 class="modal-title" id="myModalLabel">Final Order Summary</h4>
 			</div>
 			<div class="modal-body">
-				<h1>Thank you for your order!</h1>
+				<h1>Thank you for shopping at the Coolstuff Store!</h1>
 				<p>
 					Your order total of <strong>{{cart.cartTotal | currency}}</strong>
-					will be processed when you click Checkout.
+					will be processed once we have all your details. Remember to press checkout when done.
 				</p>
+					<input type="hidden" name="check" value="false" ng-model="check">
+					<div class="panel-body">
+					<form novalidate name="paymentForm" class="form-horizontal">
+						<div class="form-group">
+							<label class="col-sm-3 control-label" for="textInput-modal-markup">Name</label>
+							<div class="col-sm-9">
+								<input type="text" id="textInput-modal-markup" name="nameOnCard" class="form-control" ng-model="ccinfo.nameOnCard" required placeholder="Your name as on Card" >
+							</div>
+
+							<label class="col-sm-3 control-label" for="textInput2-modal-markup">Card Info.</label>
+							<div class="col-sm-9">
+									<input type="text" id="textInput2-modal-markup" name="creditCard" class="form-control" ng-model="ccinfo.creditCard" required data-credit-card-type data-ng-pattern="/^[0-9]+$/" data-ng-minlength="15" maxlength="19" placeholder="Card Number" >{{ccinfo.type}}
+							</div>
+
+							<label class="col-sm-3 control-label" for="textInput3-modal-markup">Expires</label>
+							<div class="col-sm-9">
+								<input type="text" class="col-sm-2" name="securityCode" class="clearfix" ng-model="ccinfo.securityCode" placeholder="CVC" required data-ng-pattern="/^[0-9]+$/" data-ng-minlength="3" maxlength="4">
+								<input type="text" class="col-sm-2" id="textInput3-modal-markup" name="month" class="clearfix" ng-model="ccinfo.month" placeholder="MM" required data-ng-pattern="/^[0-9]+$/" data-ng-minlength="2" maxlength="2">
+								<input type="text" class="col-sm-2" name="year" class="clearfix" ng-model="ccinfo.year" placeholder="YY" required data-ng-pattern="/^[0-9]+$/" data-ng-minlength="2" maxlength="2">
+							</div>
+
+							<label class="col-sm-3 control-label" for="textInput4-modal-markup">Shipping Address</label>
+							<div class="col-sm-9">
+								<input type="text" id="textInput4-modal-markup" name="shippingAddress" class="form-control" ng-model="ccinfo.shippingAddress" required placeholder="Shipping Address" >
+							</div>
+						</div>
+					</form>
 			</div>
 			<div class="modal-footer">
-				<a ng-click="checkout()" data-dismiss="modal"
-					class="btn btn-primary btn-lg">Checkout</a>
-				<a data-dismiss="modal"
-					class="btn btn-default btn-lg">Cancel</a>
+				<!-- 	<ul ng-show="paymentForm.submitAttempt && !paymentForm.$valid">
+						<div class="alert alert-danger" role="alert">
+							<small ng-show="paymentForm.creditCard.$error.minlength">Credit card must be 15-19 digits. </small>
+							<small ng-show="paymentForm.creditCard.$error.pattern">Credit card must consist of only numbers. </small>
+							<small ng-show="paymentForm.creditCard.$error.invalid">Credit card must be a valid Amex, Visa, Discover, or Master Card. </small>
+							<small ng-show="paymentForm.creditCard.$error.required">Credit card required. </small>
+							<small ng-show="paymentForm.securityCode.$error.pattern">Security code must contain only numbers. </small>
+							<small ng-show="paymentForm.securityCode.$error.minlength">Security code must be 3-4 digits. </small>
+							<small ng-show="paymentForm.securityCode.$error.required">Security code required. </small>
+							<small ng-show="paymentForm.month.$error.required">Expiration month required.  </small>
+							<small ng-show="paymentForm.year.$error.required">Expiration year required. </small>
+							<small ng-show="paymentForm.month.$error.invalid">Provided expiration date is invalid. </small>
+						</div>
+					</ul>
+					-->
+				<button type="button" class="btn btn-primary" ng-disabled="!paymentForm.$valid" ng-click="paymentForm.submitAttempt=true;checkout_withBilling(ccinfo)" data-dismiss="modal"
+					class="btn btn-primary btn-lg">Checkout</button>
+				<button type="button" class="btn btn-danger" data-dismiss="modal" class="btn btn-default btn-lg">Cancel</button>
 			</div>
 		</div>
 	</div>
