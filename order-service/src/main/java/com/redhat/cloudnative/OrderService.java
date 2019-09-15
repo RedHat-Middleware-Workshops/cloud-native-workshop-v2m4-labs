@@ -14,21 +14,22 @@ import org.bson.Document;
 @ApplicationScoped
 public class OrderService {
 
-    // TODO: Inject MongoClient here 
+    // TODO: Inject MongoClient here
+    @Inject MongoClient mongoClient;
 
     public List<Order> list(){
-        
+
         List<Order> list = new ArrayList<>();
-        
-        // TODO: Add a while loop to make an order lists using MongoCursor here 
-        
+
+        // TODO: Add a while loop to make an order lists using MongoCursor here
+
         return list;
     }
 
     public void add(Order order){
 
-        // TODO: Add to create a Document based order here 
-        
+        // TODO: Add to create a Document based order here
+
     }
 
     public void updateStatus(String orderId, String status){
@@ -57,8 +58,8 @@ public class OrderService {
             cursor.close();
         }
     }
-    
-    private MongoCollection getCollection(){
+
+    private MongoCollection<Document> getCollection(){
         return mongoClient.getDatabase("order").getCollection("order");
     }
 }

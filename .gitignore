@@ -28,4 +28,5 @@ nbdist/
 .nb-gradle/
 
 .DS_Store
-
+*.secret
+tmp/

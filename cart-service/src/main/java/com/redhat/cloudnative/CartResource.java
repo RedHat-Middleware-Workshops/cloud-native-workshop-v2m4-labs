@@ -13,9 +13,9 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
+// import org.apache.kafka.clients.producer.KafkaProducer;
+// import org.apache.kafka.clients.producer.Producer;
+// import org.apache.kafka.clients.producer.ProducerRecord;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import io.quarkus.runtime.StartupEvent;
@@ -30,7 +30,7 @@ public class CartResource {
 
     // TODO: Add annotation of orders messaging configuration here
 
-    private Producer<String, String> producer;
+    // private Producer<String, String> producer;
 
     @Inject
     ShoppingCartService shoppingCartService;
