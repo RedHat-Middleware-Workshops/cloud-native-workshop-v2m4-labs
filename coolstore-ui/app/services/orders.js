@@ -15,7 +15,6 @@ angular.module("app")
 			   url: baseUrl
 		   }).then(function(resp) {
 				orders = resp.data;
-				alert(order.status);
 			   	deferred.resolve(resp.data);
 		   }, function(err) {
 			   	deferred.reject(err);

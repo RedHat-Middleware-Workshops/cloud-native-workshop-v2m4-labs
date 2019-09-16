@@ -11,8 +11,9 @@ angular.module("app")
 
 
 	factory.checkout_withBilling = function(ccinfo){
-        var deferred = $q.defer();
-        let billingInfo = {"key": cartId ,"total": cart.total, "creditCard": {"number": ccinfo.creditCard,"expiration": ccinfo.month+"/"+ccinfo.year,"nameOnCard": ccinfo.nameOnCard}, "billingAddress": ccinfo.shippingAddress, "name": ccinfo.nameOnCard};
+		var deferred = $q.defer();
+		var orderId = "order-" + (Math.floor(Math.random() * 10000)) + "-" + cartId;
+        let billingInfo = {"orderId": orderId ,"total": cart.total, "creditCard": {"number": ccinfo.creditCard,"expiration": ccinfo.month+"/"+ccinfo.year,"nameOnCard": ccinfo.nameOnCard}, "billingAddress": ccinfo.shippingAddress, "name": ccinfo.nameOnCard};
         $http({
             method:'POST',
             url: baseUrl + '/checkout/' + cartId,

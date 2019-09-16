@@ -1,10 +1,7 @@
 package com.redhat.cloudnative;
 
-import java.util.Objects;
-
 public class OrderItem {
-	
-	private long id;
+
 	private int quantity;
 	private String productId;
 

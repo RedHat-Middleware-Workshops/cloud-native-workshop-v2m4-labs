@@ -3,7 +3,7 @@
     <tr>
       <th>Order Id</th>
       <th>Name</th>
-      <th>Price</th>
+      <th>Order Total</th>
       <th>Credit Card Number</th>
       <th>Credit Card Expiration</th>
       <th>Billing Address</th>
@@ -13,10 +13,10 @@
   <tr ng-repeat="order in orders">
     <td>{{ order.orderId }}</td>
     <td>{{ order.name }}</td>
-    <td>{{ order.price | currency }}</td>
+    <td>{{ order.total | currency }}</td>
     <td>{{ order.ccNumber }}</td>
     <td>{{ order.ccExp }}</td>
     <td>{{ order.billingAddress }}</td>
-    <td><span style="font-weight:bold">{{ order.status }}</span></td>
+    <td><span ng-style="order.status == 'COMPLETED' ? {'font-weight':'bold', 'color': 'green'} : (order.status == 'PROCESSING' ? {'font-weight':'bold', 'color': 'orange'} : {'font-weight':'bold', 'color': 'red'})">{{ order.status }}</span></td>
   </tr>
 </table>

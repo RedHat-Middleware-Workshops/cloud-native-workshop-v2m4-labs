@@ -1,9 +1,9 @@
 package com.redhat.cloudnative.model.order;
 
 public class Order {
-// {"key": "12321","total": "232.23", "creditCard": {"number": "4232454678667866","expiration": "04/22","nameOnCard": "Jane G Doe"}, "billingAddress": "123 Anystreet, Pueblo, CO 32213", "name": "Jane Doe"}
+// {"orderId": "12321","total": "232.23", "creditCard": {"number": "4232454678667866","expiration": "04/22","nameOnCard": "Jane G Doe"}, "billingAddress": "123 Anystreet, Pueblo, CO 32213", "name": "Jane Doe"}
 
-    private String key = null;
+    private String orderId = null;
     private String total = null;
     private CreditCard creditCard = null;
     private String billingAddress = null;
@@ -13,20 +13,20 @@ public class Order {
     public Order() {
     }
 
-    public Order(String key, String total, CreditCard creditCard, String billingAddress, String name) {
-        this.key = key;
+    public Order(String orderId, String total, CreditCard creditCard, String billingAddress, String name) {
+        this.orderId = orderId;
         this.total = total;
         this.creditCard = creditCard;
         this.billingAddress = billingAddress;
         this.name = name;
     }
 
-    public String getKey() {
-        return key;
+    public String getOrderId() {
+        return orderId;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
     }
 
     public String getTotal() {

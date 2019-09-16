@@ -2,7 +2,7 @@ package com.redhat.cloudnative;
 
 public class Order {
 
-	private String id;
+	private String orderId;
 	private String name;
 	private String total;
 	private String ccNumber;
@@ -21,12 +21,12 @@ public class Order {
 		this.status = status;
 	}
 
-	public String getId() {
-		return id;
+	public String getOrderId() {
+		return orderId;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
 	}
 
 	public String getName() {
