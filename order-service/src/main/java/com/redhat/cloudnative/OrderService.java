@@ -15,7 +15,6 @@ import org.bson.Document;
 public class OrderService {
 
     // TODO: Inject MongoClient here
-    @Inject MongoClient mongoClient;
 
     public List<Order> list(){
 
