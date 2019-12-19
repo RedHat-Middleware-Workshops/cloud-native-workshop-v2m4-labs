@@ -12,4 +12,4 @@ spec:
     spec:
       containers:
         # Replace Project name userXX-cloudnativeapps with project in which payment is deployed
-      - image: YOUR_IMAGE_SERVICE_URL/payment:latest
+      - image: YOUR_IMAGE_SERVICE_URL:latest
