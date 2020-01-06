@@ -69,6 +69,10 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <uberJar>true</uberJar>
+          <ignoredEntries>META-INF/BC2048KE.SF,META-INF/BC1024KE.SF,META-INF/BC2048KE.DSA,META-INF/BC1024KE.DSA</ignoredEntries>
+        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -93,7 +97,6 @@
                   <goal>native-image</goal>
                 </goals>
                 <configuration>
-                   <uberJar>true</uberJar>
                   <enableHttpUrlHandler>true</enableHttpUrlHandler>
                 </configuration>
               </execution>
