@@ -1,9 +1,6 @@
 package com.redhat.cloudnative.service;
 
-import com.redhat.cloudnative.model.Inventory;
 import com.redhat.cloudnative.model.Product;
-import io.specto.hoverfly.junit.rule.HoverflyRule;
-import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.specto.hoverfly.junit.dsl.HttpBodyConverter.json;
-import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
-import static io.specto.hoverfly.junit.dsl.matchers.HoverflyMatchers.startsWith;
 import static org.assertj.core.api.Assertions.assertThat;
-import static io.specto.hoverfly.junit.core.SimulationSource.dsl;
-import static io.specto.hoverfly.junit.dsl.HoverflyDsl.service;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -31,18 +23,6 @@ public class CatalogEndpointTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
-
-//TODO: Add ClassRule for HoverFly Inventory simulation
-    @ClassRule
-    public static HoverflyRule hoverflyRule = HoverflyRule.inSimulationMode(dsl(
-            service("inventory:8080")
-    //                    .andDelay(2500, TimeUnit.MILLISECONDS).forMethod("GET")
-                    .get(startsWith("/services/inventory"))
-    //                    .willReturn(serverError())
-                   // .willReturn(success(json(new Inventory("9999",9999))))
-                   .willReturn(success("[{\"itemId\":\"329199\",\"quantity\":9999}]", "application/json"))
-
-    ));
 
     @Test
     public void test_retriving_one_proudct() {
@@ -52,7 +32,7 @@ public class CatalogEndpointTest {
         assertThat(response.getBody())
                 .returns("329199",Product::getItemId)
                 .returns("Forge Laptop Sticker",Product::getName)
-//TODO: Add check for Quantity
+                //TODO: Add check for Quantity
                 .returns(9999,Product::getQuantity)
                 .returns(8.50,Product::getPrice);
     }
@@ -76,7 +56,7 @@ public class CatalogEndpointTest {
         assertThat(fedora)
                 .returns("329299",Product::getItemId)
                 .returns("Red Fedora", Product::getName)
-//TODO: Add check for Quantity
+                //TODO: Add check for Quantity
                 .returns(9999,Product::getQuantity)
                 .returns(34.99,Product::getPrice);
     }
