@@ -22,8 +22,10 @@ import org.slf4j.LoggerFactory;
 import io.quarkus.runtime.StartupEvent;
 import io.smallrye.reactive.messaging.kafka.KafkaMessage;
 import io.vertx.core.json.JsonObject;
+import javax.inject.Singleton;
 
 @Path("/")
+@Singleton
 public class PaymentResource {
 
     // TODO: Add Messaging ConfigProperty here
