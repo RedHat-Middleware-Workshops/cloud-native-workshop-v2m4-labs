@@ -15,7 +15,9 @@
     "express": "^4.13.4",
     "keycloak-connect": "^3.1.0",
     "request": "^2.74.0",
-    "bower": ">=1.7.9"
+    "bower": ">=1.7.9",
+    "patternfly": "3.17.0",
+    "angular-patternfly": "3.17.0"
   },
   "devDependencies": {
     "bower": ">=1.7.9",
