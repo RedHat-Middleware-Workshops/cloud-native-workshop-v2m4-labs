@@ -9,12 +9,8 @@
     "devDependencies": {
         "bootstrap-switch": "3.3.2",
         "imagesloaded": "4.1.1",
+        "angular-sanitize": "1.5.10",
         "angular-route": "1.5.10",
         "keycloak": "1.9.8"
-    },
-    "resolutions": {
-        "angular": "1.5.10",
-        "jquery": "3.4.1",
-        "bootstrap": "~3.3.7"
     }
 }

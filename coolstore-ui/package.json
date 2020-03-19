@@ -11,13 +11,15 @@
   "description": "A JBoss Developer retail demo featuring a pricing microservice, angular UI microservice, protected by Red Hat SSO",
   "homepage": "https://developers.redhat.com",
   "dependencies": {
+    "angular-patternfly": "3.17.0",
+    "bower": ">=1.7.9",
     "cors": "^2.8.3",
     "express": "^4.13.4",
+    "isotope-layout": "^3.0.6",
+    "jquery-match-height": "^0.7.2",
     "keycloak-connect": "^4.8.3",
-    "request": "^2.74.0",
-    "bower": ">=1.7.9",
     "patternfly": "3.17.0",
-    "angular-patternfly": "3.17.0"
+    "request": "^2.74.0"
   },
   "devDependencies": {
     "bower": ">=1.7.9",
