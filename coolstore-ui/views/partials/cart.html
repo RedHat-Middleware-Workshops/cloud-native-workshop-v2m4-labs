@@ -16,7 +16,7 @@
 							      		alt="{{item.product.name}}">
 							  </div>
 							  <div class="media-body">
-							  
+
 							    <h2 class="media-heading">{{item.product.name}}</h2>
 							    <div class="p-t-8">
 							    	<span class="label label-default">Quantity: {{item.quantity}}</span>
@@ -54,7 +54,7 @@
 			</h2>
 		</div>
 		<div class="panel-footer">
-			<button ng-disabled="cart.shoppingCartItemList.length < 0"
+			<button ng-disabled="cart.shoppingCartItemList.length <= 0"
 				class="btn btn-primary btn-lg" data-toggle="modal"
 				data-target="#checkoutModal" type="button">Checkout</button>
 
