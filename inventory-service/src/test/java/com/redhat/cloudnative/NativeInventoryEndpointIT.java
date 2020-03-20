@@ -1,8 +1,8 @@
 package com.redhat.cloudnative;
 
-import io.quarkus.test.junit.SubstrateTest;
+import io.quarkus.test.junit.NativeImageTest;
 
-@SubstrateTest
+@NativeImageTest
 public class NativeInventoryEndpointIT extends InventoryEndpointTest {
 
     // Runs the same tests as the parent class
