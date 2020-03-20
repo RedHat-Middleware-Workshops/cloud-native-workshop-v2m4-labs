@@ -3,8 +3,8 @@ package com.redhat.cloudnative.service;
 import com.redhat.cloudnative.model.Product;
 import com.redhat.cloudnative.model.ShoppingCart;
 import com.redhat.cloudnative.model.ShoppingCartItem;
-import io.quarkus.infinispan.client.runtime.Remote;
 import org.infinispan.client.hotrod.RemoteCache;
+import io.quarkus.infinispan.client.Remote;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
