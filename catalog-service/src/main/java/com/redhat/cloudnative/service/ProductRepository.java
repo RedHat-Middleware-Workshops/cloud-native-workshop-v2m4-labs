@@ -29,7 +29,7 @@ public class ProductRepository {
 
     //TODO: Create a method for returning one product
     public Product findById(String id) {
-        return jdbcTemplate.queryForObject("SELECT * FROM catalog WHERE itemId = '" + id + "'", rowMapper);
+        return this.jdbcTemplate.queryForObject("SELECT * FROM catalog WHERE itemId = ?", new Object[]{id}, rowMapper);
     }
 
 }
