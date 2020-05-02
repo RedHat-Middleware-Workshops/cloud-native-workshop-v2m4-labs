@@ -5,27 +5,29 @@
   <groupId>com.redhat.cloudnative</groupId>
   <artifactId>payment</artifactId>
   <version>1.0-SNAPSHOT</version>
-
   <properties>
-    <quarkus.version>1.3.2.Final</quarkus.version>
-    <compiler-plugin.version>3.8.1</compiler-plugin.version>
-    <surefire-plugin.version>2.22.1</surefire-plugin.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <maven.compiler.parameters>true</maven.compiler.parameters>
+      <compiler-plugin.version>3.8.1</compiler-plugin.version>
+      <maven.compiler.parameters>true</maven.compiler.parameters>
+      <maven.compiler.source>1.8</maven.compiler.source>
+      <maven.compiler.target>1.8</maven.compiler.target>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+      <quarkus-plugin.version>1.3.2.Final-redhat-00001</quarkus-plugin.version>
+      <quarkus.platform.artifact-id>quarkus-universe-bom</quarkus.platform.artifact-id>
+      <quarkus.platform.group-id>com.redhat.quarkus</quarkus.platform.group-id>
+      <quarkus.platform.version>1.3.2.Final-redhat-00001</quarkus.platform.version>
+      <surefire-plugin.version>2.22.1</surefire-plugin.version>
   </properties>
-
   <dependencyManagement>
-    <dependencies>
+      <dependencies>
       <dependency>
-        <groupId>io.quarkus</groupId>
-        <artifactId>quarkus-bom</artifactId>
-        <version>${quarkus.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
+          <groupId>${quarkus.platform.group-id}</groupId>
+          <artifactId>${quarkus.platform.artifact-id}</artifactId>
+          <version>${quarkus.platform.version}</version>
+          <type>pom</type>
+          <scope>import</scope>
       </dependency>
-    </dependencies>
+      </dependencies>
   </dependencyManagement>
   <dependencies>
     <dependency>
@@ -43,8 +45,20 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <build>
+    <build>
     <plugins>
+      <plugin>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-maven-plugin</artifactId>
+        <version>${quarkus-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>build</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${compiler-plugin.version}</version>
@@ -58,24 +72,8 @@
           </systemProperties>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>io.quarkus</groupId>
-        <artifactId>quarkus-maven-plugin</artifactId>
-        <version>${quarkus.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>build</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <uberJar>true</uberJar>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
-
   <profiles>
     <profile>
       <id>native</id>
@@ -87,21 +85,6 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-maven-plugin</artifactId>
-            <version>${quarkus.version}</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>native-image</goal>
-                </goals>
-                <configuration>
-                  <enableHttpUrlHandler>true</enableHttpUrlHandler>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
             <version>${surefire-plugin.version}</version>
             <executions>
@@ -112,7 +95,7 @@
                 </goals>
                 <configuration>
                   <systemProperties>
-                      <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
+                    <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
                   </systemProperties>
                 </configuration>
               </execution>
@@ -120,6 +103,9 @@
           </plugin>
         </plugins>
       </build>
+      <properties>
+        <quarkus.package.type>native</quarkus.package.type>
+      </properties>
     </profile>
   </profiles>
 </project>
