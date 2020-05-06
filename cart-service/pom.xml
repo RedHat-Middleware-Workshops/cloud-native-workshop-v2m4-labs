@@ -57,10 +57,6 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-infinispan-client</artifactId>
         </dependency>
-        <dependency>
-          <groupId>io.quarkus</groupId>
-          <artifactId>quarkus-openshift</artifactId>
-        </dependency>
     </dependencies>
     <build>
     <plugins>
