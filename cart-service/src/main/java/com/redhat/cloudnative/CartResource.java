@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 // import org.apache.kafka.clients.producer.KafkaProducer;
 // import org.apache.kafka.clients.producer.Producer;
 // import org.apache.kafka.clients.producer.ProducerRecord;
+// import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import io.quarkus.runtime.StartupEvent;
