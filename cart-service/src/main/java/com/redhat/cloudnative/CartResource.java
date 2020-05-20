@@ -30,6 +30,7 @@ public class CartResource {
     private static final Logger log = LoggerFactory.getLogger(CartResource.class);
 
     // TODO: Add annotation of orders messaging configuration here
+    
     @Inject
     ShoppingCartService shoppingCartService;
 
