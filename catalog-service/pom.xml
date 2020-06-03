@@ -27,21 +27,21 @@
     <description>Rest JDBC SpringBoot Coolstore Catalog App</description>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>1.8</java.version>
         <spring-cloud.bom.version>Greenwich.SR3</spring-cloud.bom.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+        <spring-boot-maven-plugin.version>2.2.6.RELEASE</spring-boot-maven-plugin.version>
     </properties>
 
    <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>me.snowdrop</groupId>
-                <artifactId>spring-boot-bom</artifactId>
-                <version>2.1.13.Final-redhat-00001</version>
+                <groupId>dev.snowdrop</groupId>
+                <artifactId>snowdrop-dependencies</artifactId>
+                <version>2.2.6.Final-redhat-00001</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -141,6 +141,7 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot-maven-plugin.version}</version>
                     <executions>
                         <execution>
                             <goals>
@@ -179,66 +180,16 @@
     <repositories>
         <repository>
           <id>redhat-ga-repository</id>
+          <name>Red Hat GA Repository</name>
           <url>https://maven.repository.redhat.com/ga/</url>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-        </repository>
-        <repository>
-          <id>redhat-ea-repository</id>
-          <url>https://maven.repository.redhat.com/earlyaccess/all/</url>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-        </repository>
-        <repository>
-          <id>jboss-eap-repository</id>
-          <url>https://maven.repository.redhat.com/techpreview/all</url>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
         </repository>
     </repositories>
 
     <pluginRepositories>
-        <pluginRepository>
-          <id>redhat-ga-plugin-repository</id>
+      <pluginRepository>
+        <id>redhat-ga</id>
+          <name>Red Hat GA Repository</name>
           <url>https://maven.repository.redhat.com/ga/</url>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-        </pluginRepository>
-        <pluginRepository>
-          <id>redhat-ea-plugin-repository</id>
-          <url>https://maven.repository.redhat.com/earlyaccess/all/</url>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-        </pluginRepository>
-        <pluginRepository>
-          <id>jboss-eap-plugin-repository</id>
-          <url>https://maven.repository.redhat.com/techpreview/all</url>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-        </pluginRepository>
-      </pluginRepositories>
+      </pluginRepository>
+    </pluginRepositories>
 </project>
