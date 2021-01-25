@@ -25,10 +25,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     private static final Logger log = LoggerFactory.getLogger(ShoppingCartServiceImpl.class);
 
     // TODO Inject RemoteCache
-    @Inject
-    @Remote(CacheService.CART_CACHE)
-    RemoteCache<String, ShoppingCart> carts;
-
+    
 
     @Inject
     PromotionService ps;
@@ -70,7 +67,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             }
 
             ps.applyShippingPromotions(sc);
-
             sc.setCartTotal(sc.getCartItemTotal() + sc.getShippingTotal());
         }
     }
@@ -119,7 +115,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
         return products;
     }
-
 
     @Override
     public ShoppingCart deleteItem(String cartId, String itemId, int quantity) {

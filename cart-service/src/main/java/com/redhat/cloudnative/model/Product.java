@@ -1,10 +1,7 @@
 package com.redhat.cloudnative.model;
 
-import io.vertx.core.json.Json;
 import org.infinispan.protostream.annotations.ProtoFactory;
 import org.infinispan.protostream.annotations.ProtoField;
-
-import java.util.Objects;
 
 public class Product {
 
@@ -20,10 +17,10 @@ public class Product {
     @ProtoFactory
     public Product(String itemId, String name, String desc, double price) {
         super();
-        this.itemId = Objects.requireNonNull(itemId);
-        this.name = Objects.requireNonNull(name);
-        this.desc = Objects.requireNonNull(desc);
-        this.price = Objects.requireNonNull(price);
+        this.itemId = itemId;
+        this.name = name;
+        this.desc = desc;
+        this.price = price;
     }
 
     @ProtoField(number = 1)
@@ -58,8 +55,4 @@ public class Product {
         this.price = price;
     }
 
-    @Override
-    public String toString() {
-        return Json.encode(this);
-    }
 }

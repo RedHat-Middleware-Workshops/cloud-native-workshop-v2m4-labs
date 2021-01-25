@@ -5,14 +5,14 @@ import org.infinispan.protostream.annotations.ProtoField;
 
 public class ShoppingCartItem {
 
-    private double price = 0;
+    private double price = 0.0f;
     private int quantity = 0;
     private double promoSavings = 0.0f;
     private Product product;
 
-    public ShoppingCartItem() {
-    }
+    public ShoppingCartItem() {}
 
+    @ProtoFactory
     public ShoppingCartItem(Product product, double price, int quantity, double promoSavings) {
         this.price = price;
         this.quantity = quantity;

@@ -3,28 +3,20 @@ package com.redhat.cloudnative.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.vertx.core.json.Json;
 import org.infinispan.protostream.annotations.ProtoFactory;
 import org.infinispan.protostream.annotations.ProtoField;
 
 public class ShoppingCart {
 
     private double cartItemTotal = 0.0f;
-
     private double cartItemPromoSavings = 0.0f;
-
     private double shippingTotal = 0.0f;
-
     private double shippingPromoSavings = 0.0f;
-
     private double cartTotal = 0.0f;
-
     private String cartId;
-
     private List<ShoppingCartItem> shoppingCartItemList = new ArrayList<ShoppingCartItem>();
 
-    public ShoppingCart(){}
-
+    public ShoppingCart() {}
 
     public ShoppingCart(String cartId){
         this.cartId = cartId;
@@ -45,6 +37,7 @@ public class ShoppingCart {
     public String getCartId() {
         return cartId;
     }
+
     public void setCartId(String cartId) {
         this.cartId = cartId;
     }
@@ -53,6 +46,7 @@ public class ShoppingCart {
     public List<ShoppingCartItem> getShoppingCartItemList() {
         return shoppingCartItemList;
     }
+
     public void setShoppingCartItemList(List<ShoppingCartItem> shoppingCartItemList) {
         this.shoppingCartItemList = shoppingCartItemList;
     }
@@ -73,13 +67,13 @@ public class ShoppingCart {
             removed = shoppingCartItemList.remove(sci);
         }
         return removed;
-
     }
 
     @ProtoField(number = 3, required = false, defaultValue = "0.0f")
     public double getCartItemTotal() {
         return cartItemTotal;
     }
+
     public void setCartItemTotal(double cartItemTotal) {
         this.cartItemTotal = cartItemTotal;
     }
@@ -88,6 +82,7 @@ public class ShoppingCart {
     public double getShippingTotal() {
         return shippingTotal;
     }
+
     public void setShippingTotal(double shippingTotal) {
         this.shippingTotal = shippingTotal;
     }
@@ -96,6 +91,7 @@ public class ShoppingCart {
     public double getCartTotal() {
         return cartTotal;
     }
+
     public void setCartTotal(double cartTotal) {
         this.cartTotal = cartTotal;
     }
@@ -104,6 +100,7 @@ public class ShoppingCart {
     public double getCartItemPromoSavings() {
         return cartItemPromoSavings;
     }
+
     public void setCartItemPromoSavings(double cartItemPromoSavings) {
         this.cartItemPromoSavings = cartItemPromoSavings;
     }
@@ -112,13 +109,9 @@ public class ShoppingCart {
     public double getShippingPromoSavings() {
         return shippingPromoSavings;
     }
+
     public void setShippingPromoSavings(double shippingPromoSavings) {
         this.shippingPromoSavings = shippingPromoSavings;
-    }
-
-    @Override
-    public String toString() {
-        return Json.encode(this);
     }
 
 }
