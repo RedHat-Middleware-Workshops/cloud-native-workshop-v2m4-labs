@@ -13,5 +13,4 @@ public interface ShoppingCartService {
     public ShoppingCart set(String cartId, String tmpId);
     public void priceShoppingCart(ShoppingCart sc);
 
-
 }
