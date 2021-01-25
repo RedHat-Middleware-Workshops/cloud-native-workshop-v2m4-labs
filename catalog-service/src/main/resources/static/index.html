@@ -34,7 +34,6 @@
                 <tr>
                     <th>Item ID</th>
                     <th>Name</th>
-                    <th>Description</th>
                     <th>Price</th>
                     <th>Inventory Quantity</th>
                 </tr>
@@ -90,7 +89,6 @@
                         trHTML += '<tr>' +
                             '<td>' + product.itemId + '</td>' +
                             '<td><strong>' + product.name + '</strong></td>' +
-                            '<td>' + product.desc + '</a></td>' +
                             '<td>' + product.price + '</a></td>' +
                             '<td>' + product.quantity + '</a></td>' +
                             '</tr>';
@@ -104,9 +102,6 @@
 
                     $('#statusCode').text("DEAD (" + (msg.statusText ? msg.statusText : "") + ")").css('color', 'red');
                     $("#fetchAge").text(Math.floor(((new Date().getTime() - lastFetch) / 1000)) + " seconds ago");
-
-                    // $("time#statusTime").timeago("update", new Date());
-                    //$('#statusTime').attr('datetime', now).textContent(now);
                 }
             });
     }
