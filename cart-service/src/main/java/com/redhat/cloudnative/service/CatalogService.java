@@ -1,7 +1,3 @@
 package com.redhat.cloudnative.service;
 
-
-public interface CatalogService {
-
-
-}
+public interface CatalogService {}

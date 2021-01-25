@@ -3,8 +3,8 @@ package com.redhat.cloudnative.service;
 import com.redhat.cloudnative.model.Product;
 import com.redhat.cloudnative.model.ShoppingCart;
 import com.redhat.cloudnative.model.ShoppingCartItem;
-import org.infinispan.client.hotrod.RemoteCache;
 import io.quarkus.infinispan.client.Remote;
+import org.infinispan.client.hotrod.RemoteCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +32,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Inject
     ShippingService ss;
 
-
     private Map<String, Product> productMap = new HashMap<>();
-
 
     @Override
     public ShoppingCart getShoppingCart(String cartId) {
@@ -66,7 +64,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             }
 
             ps.applyShippingPromotions(sc);
-
             sc.setCartTotal(sc.getCartItemTotal() + sc.getShippingTotal());
         }
     }
@@ -116,7 +113,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         return products;
     }
 
-
     @Override
     public ShoppingCart deleteItem(String cartId, String itemId, int quantity) {
         List<ShoppingCartItem> toRemoveList = new ArrayList<>();
@@ -160,10 +156,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         }
 
 
-        ShoppingCartItem sci = new ShoppingCartItem();
-        sci.setProduct(product);
-        sci.setQuantity(quantity);
-        sci.setPrice(product.getPrice());
+        ShoppingCartItem sci = new ShoppingCartItem(product, product.getPrice(), quantity, 0.0f);
         cart.addShoppingCartItem(sci);
 
         try {

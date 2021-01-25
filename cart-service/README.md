@@ -55,11 +55,10 @@ bin/kafka-server-start.sh config/server.properties
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic orders
 
 # Listening to the topic on the console
-bin/kafka-console-consumer.sh --topic orders --from-begining
+bin/kafka-console-consumer.sh --topic orders --from-beginning
 
 # Run infinispan for cache of the cart
-docker run -it -p 11222:11222 jboss/infinispan-server:10.0.0.Beta3
-
+docker run -it -p 11222:11222 -e USER="user" -e PASS="pass" registry.redhat.io/datagrid/datagrid-8-rhel8:latest
    ```
 
 
