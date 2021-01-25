@@ -19,6 +19,6 @@ public class OrderCodec implements CollectibleCodec<Order> {
     }
    
     // TODO: Add Encode & Decode contexts here
-    
+
     
 }
