@@ -20,6 +20,7 @@ import javax.ws.rs.core.MediaType;
 // import org.apache.kafka.common.header.internals.RecordHeaders;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.openapi.annotations.Operation;
 
 import io.quarkus.runtime.StartupEvent;
 
