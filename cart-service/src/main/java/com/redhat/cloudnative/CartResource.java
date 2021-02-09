@@ -20,7 +20,6 @@ import javax.ws.rs.core.MediaType;
 // import org.apache.kafka.common.header.internals.RecordHeaders;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipse.microprofile.openapi.annotations.Operation;
 
 import io.quarkus.runtime.StartupEvent;
 
@@ -69,7 +68,6 @@ public class CartResource {
     @Path("/checkout/{cartId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "checkout")
     public ShoppingCart checkout(@PathParam("cartId") String cartId, Order order) {
         // TODO ADD for KAFKA
         //sendOrder(order, cartId);
