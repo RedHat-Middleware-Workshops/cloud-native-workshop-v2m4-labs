@@ -20,6 +20,7 @@ import javax.ws.rs.core.MediaType;
 // import org.apache.kafka.common.header.internals.RecordHeaders;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.openapi.annotations.Operation;
 
 import io.quarkus.runtime.StartupEvent;
 
@@ -41,6 +42,7 @@ public class CartResource {
     @POST
     @Path("{cartId}/{itemId}/{quantity}")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Add an Item with its quantity")
     public ShoppingCart add(@PathParam("cartId") String cartId,
                             @PathParam("itemId") String itemId,
                             @PathParam("quantity") int quantity) throws Exception {
@@ -50,6 +52,7 @@ public class CartResource {
     @POST
     @Path("{cartId}/{tmpId}")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Set the cart with a new Id")
     public ShoppingCart set(@PathParam("cartId") String cartId,
                             @PathParam("tmpId") String tmpId) throws Exception {
         return shoppingCartService.set(cartId, tmpId);
@@ -58,6 +61,7 @@ public class CartResource {
     @DELETE
     @Path("{cartId}/{itemId}/{quantity}")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "delete a quantity or item from the cart")
     public ShoppingCart delete(@PathParam("cartId") String cartId,
                                @PathParam("itemId") String itemId,
                                @PathParam("quantity") int quantity) throws Exception {
@@ -68,6 +72,7 @@ public class CartResource {
     @Path("/checkout/{cartId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "checkout")
     public ShoppingCart checkout(@PathParam("cartId") String cartId, Order order) {
         // TODO ADD for KAFKA
         //sendOrder(order, cartId);
