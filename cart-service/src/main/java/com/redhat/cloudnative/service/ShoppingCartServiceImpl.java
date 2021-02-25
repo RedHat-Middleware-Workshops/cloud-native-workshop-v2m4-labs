@@ -32,9 +32,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Inject
     ShippingService ss;
 
-
     private Map<String, Product> productMap = new HashMap<>();
-
 
     @Override
     public ShoppingCart getShoppingCart(String cartId) {
