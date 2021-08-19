@@ -3,7 +3,6 @@ package com.redhat.cloudnative;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.json.Json;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -17,7 +16,6 @@ import javax.ws.rs.ext.Provider;
 import org.jboss.resteasy.annotations.jaxrs.PathParam;
 
 @Path("/api/inventory")
-@ApplicationScoped
 @Produces("application/json")
 @Consumes("application/json")
 public class InventoryResource {
