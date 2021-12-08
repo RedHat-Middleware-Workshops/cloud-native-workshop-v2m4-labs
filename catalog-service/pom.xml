@@ -33,7 +33,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-cloud.bom.version>Hoxton.SR9</spring-cloud.bom.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-        <spring-boot-maven-plugin.version>2.3.6.RELEASE</spring-boot-maven-plugin.version>
+        <spring-boot-maven-plugin.version>2.4.9.RELEASE</spring-boot-maven-plugin.version>
     </properties>
 
    <dependencyManagement>
