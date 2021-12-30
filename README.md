@@ -1,4 +1,4 @@
-The CCN Roadshow(Dev Track) Module 4 Labs 2021
+The CCN Roadshow(Dev Track) Module 4 Labs 2022
 ===
 
 This repo provides templates, generated Java codes, empty configuration for each labs that developers need to implement cloud-native microservices in workshop. 
