@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.*;
 
 // import org.apache.kafka.clients.producer.KafkaProducer;
 // import org.apache.kafka.clients.producer.Producer;
