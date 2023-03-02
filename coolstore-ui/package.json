@@ -18,7 +18,7 @@
     "express": "^4.17.3",
     "isotope-layout": "^3.0.6",
     "jquery-match-height": "^0.7.2",
-    "keycloak-connect": "^4.8.3",
+    "keycloak-connect": "^21.0.1",
     "patternfly": "3.17.0",
     "request": "^2.74.0"
   },
