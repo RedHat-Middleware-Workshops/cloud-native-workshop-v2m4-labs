@@ -1,0 +1,67 @@
+schemaVersion: 2.2.0
+metadata:
+  name: quarkus-workshop
+attributes:
+  controller.devfile.io/storage-type: ephemeral
+components:
+  - container:
+      cpuLimit: 2000m
+      cpuRequest: 500m
+      endpoints:
+        - exposure: public
+          name: index-webpage
+          protocol: http
+          targetPort: 8080
+        - exposure: public
+          name: quarkus-devui
+          path: /q/dev
+          protocol: http
+          targetPort: 8080
+        - exposure: none
+          name: quarkus-debug
+          protocol: tcp
+          targetPort: 5005
+        - exposure: none
+          name: test-endpoint
+          protocol: tcp
+          targetPort: 8081
+      env:
+        - value: /home/jboss/.m2
+          name: MAVEN_CONFIG
+        - value: -Xmx4G -Xss128M -XX:MetaspaceSize=1G -XX:MaxMetaspaceSize=2G
+          name: MAVEN_OPTS
+      image: quay.io/openshiftlabs/cloudnative-workspaces-quarkus:3.5
+      memoryLimit: 6Gi
+      memoryRequest: 4Gi
+    name: quarkus-tools
+commands:
+  - id: 01-run-tests
+    exec:
+      label: 01. Run Tests
+      component: quarkus-tools
+      commandLine: mvn verify
+  - id: 02-live-coding
+    exec:
+      label: 02. Start Live Coding
+      component: quarkus-tools
+      commandLine: mvn clean quarkus:dev -Dquarkus.http.host=0.0.0.0
+  - id: 03-package-app
+    exec:
+      label: 03. Package App for OpenShift
+      component: quarkus-tools
+      commandLine: mvn package -DskipTests
+  - id: 04-build-native
+    exec:
+      label: 04. Build Native App
+      component: quarkus-tools
+      commandLine: mvn package -Pnative -DskipTests
+  - id: 05-run-fast-jar
+    exec:
+      label: 05. Run Fast Jar
+      component: quarkus-tools
+      commandLine: java -Dquarkus.http.port=8081 -jar target/quarkus-app/quarkus-run.jar
+  - id: 06-run-native
+    exec:
+      label: 06. Run Native App
+      component: quarkus-tools
+      commandLine: ./target/people-1.0-SNAPSHOT-runner -Dquarkus.http.port=8081
