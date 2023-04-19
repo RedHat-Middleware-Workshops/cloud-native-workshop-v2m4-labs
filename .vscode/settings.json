@@ -1,0 +1,4 @@
+{
+    "java.server.launchMode": "Standard",
+    "cli.executable.path": "/checode/remote/data/User/globalStorage/redhat.mta-vscode-extension/.mta/tooling/vscode/windup-cli-6.1.0.Final/bin/windup-cli"
+}
