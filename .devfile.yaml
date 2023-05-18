@@ -1,6 +1,6 @@
 schemaVersion: 2.2.0
 metadata:
-  name: quarkus-workshop
+  name: ccn-workshop
 attributes:
   controller.devfile.io/storage-type: ephemeral
 components:
