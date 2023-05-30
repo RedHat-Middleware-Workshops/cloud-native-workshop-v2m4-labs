@@ -25,7 +25,7 @@
   "devDependencies": {
     "bower": ">=1.7.9",
     "bower-nexus3-resolver": "*",
-    "nodeshift": "6.0.2"
+    "nodeshift": "10.0.0"
   },
   "engines": {
     "node": ">=0.10.10"
