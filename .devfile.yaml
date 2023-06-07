@@ -4,7 +4,8 @@ metadata:
 attributes:
   controller.devfile.io/storage-type: ephemeral
 components:
-  - container:
+  - name: quarkus-tools
+    container:
       cpuLimit: 2000m
       cpuRequest: 500m
       endpoints:
@@ -33,7 +34,12 @@ components:
       image: quay.io/openshiftlabs/cloudnative-workspaces-quarkus:3.6
       memoryLimit: 6Gi
       memoryRequest: 4Gi
-    name: quarkus-tools
+      volumeMounts:
+        - name: npm
+          path: /home/user/.npm
+  - name: npm
+    volume:
+      size: 1G
 commands:
   - id: 01-run-tests
     exec:
