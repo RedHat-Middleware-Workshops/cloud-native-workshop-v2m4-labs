@@ -9,9 +9,9 @@ import io.vertx.core.json.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.ws.rs.*;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
 
 // import org.apache.kafka.clients.producer.KafkaProducer;
 // import org.apache.kafka.clients.producer.Producer;

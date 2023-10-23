@@ -4,7 +4,7 @@ import com.redhat.cloudnative.model.Promotion;
 import com.redhat.cloudnative.model.ShoppingCart;
 import com.redhat.cloudnative.model.ShoppingCartItem;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

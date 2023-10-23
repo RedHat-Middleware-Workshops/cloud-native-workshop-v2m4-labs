@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.CompletionStage;
 
-import javax.enterprise.event.Observes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import jakarta.enterprise.event.Observes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import io.quarkus.runtime.StartupEvent;
 import io.smallrye.reactive.messaging.kafka.KafkaRecord;
 import io.vertx.core.json.JsonObject;
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Path("/")
 @Singleton

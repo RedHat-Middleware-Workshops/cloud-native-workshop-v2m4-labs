@@ -1,7 +1,7 @@
 package com.redhat.cloudnative;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Entity;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Entity;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 

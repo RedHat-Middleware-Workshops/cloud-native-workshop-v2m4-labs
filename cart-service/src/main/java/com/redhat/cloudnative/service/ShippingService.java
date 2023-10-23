@@ -2,7 +2,7 @@ package com.redhat.cloudnative.service;
 
 import com.redhat.cloudnative.model.ShoppingCart;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class ShippingService {
