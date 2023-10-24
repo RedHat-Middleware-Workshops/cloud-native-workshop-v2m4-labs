@@ -29,7 +29,11 @@
   <dependencies>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-resteasy-jackson</artifactId>
+      <artifactId>quarkus-resteasy-reactive</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-resteasy-reactive-jackson</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -66,7 +70,7 @@
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
-      <id>jboss-enterprise-maven-repository-ga</id>
+      <id>redhat</id>
       <url>https://maven.repository.redhat.com/ga/</url>
     </repository>
   </repositories>
@@ -78,7 +82,7 @@
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
-      <id>jboss-enterprise-maven-repository-ga</id>
+      <id>redhat</id>
       <url>https://maven.repository.redhat.com/ga/</url>
     </pluginRepository>
   </pluginRepositories>
