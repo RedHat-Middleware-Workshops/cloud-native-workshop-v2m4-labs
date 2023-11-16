@@ -44,7 +44,6 @@ components:
         - name: TESTCONTAINERS_CHECKS_DISABLE
           value: 'true'
       image: quay.io/openshiftlabs/cloudnative-workspaces-quarkus:3.9
-      # image: quay.io/devfile/universal-developer-image:latest
       memoryLimit: 6Gi
       memoryRequest: 4Gi
       volumeMounts:
