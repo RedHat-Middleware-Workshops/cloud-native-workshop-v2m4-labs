@@ -15,7 +15,7 @@ components:
           targetPort: 8080
         - exposure: public
           name: quarkus-devui
-          path: /q/dev
+          path: /q/dev-ui
           protocol: https
           targetPort: 8080
         - exposure: none
